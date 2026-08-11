@@ -54,7 +54,7 @@ Instance.new("UICorner", textBox).CornerRadius = UDim.new(0, 6)
 local activateBtn = Instance.new("TextButton")
 activateBtn.Size = UDim2.new(0.4, 0, 0, 40)
 activateBtn.Position = UDim2.new(0.3, 0, 0.65, 0)
-activateBtn.Text = "⚡ ACTIVATE"
+activateBtn.Text = "🔥 ACTIVATE"
 activateBtn.TextColor3 = Color3.new(1, 1, 1)
 activateBtn.BackgroundColor3 = Color3.new(1, 0.7, 0)
 activateBtn.Font = Enum.Font.GothamBold
@@ -104,7 +104,7 @@ activateBtn.MouseButton1Click:Connect(function()
         local toggleBtn = Instance.new("TextButton")
         toggleBtn.Size = UDim2.new(0, 55, 0, 55)
         toggleBtn.Position = UDim2.new(0.92, -27, 0.8, -27)
-        toggleBtn.Text = "⚡"
+        toggleBtn.Text = "🔥"
         toggleBtn.TextScaled = true
         toggleBtn.TextColor3 = Color3.new(0, 1, 1)
         toggleBtn.BackgroundColor3 = Color3.new(0.05, 0.05, 0.1)
@@ -156,7 +156,7 @@ activateBtn.MouseButton1Click:Connect(function()
 
         local title2 = Instance.new("TextLabel")
         title2.Size = UDim2.new(1, 0, 0, 40)
-        title2.Text = "⚡ MENU"
+        title2.Text = "🔥 tân bá đạo"
         title2.TextColor3 = Color3.new(1, 1, 1)
         title2.TextScaled = true
         title2.Font = Enum.Font.GothamBold
