@@ -1,5 +1,5 @@
 -- ============================================
--- TYRANT OF JURASSIC HUB (MENU TO + TP FIX)
+-- TYRANT OF JURASSIC HUB (FIX TP + TÊN THẲNG)
 -- Key: tan
 -- ============================================
 
@@ -80,11 +80,12 @@ activateBtn.MouseButton1Click:Connect(function()
         print("🦖 TYRANT ACTIVATED!")
 
         -- ============================================
-        -- MAIN SCRIPT (MENU TO + TP FIX)
+        -- MAIN SCRIPT (FIX TP)
         -- ============================================
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
         local RunService = game:GetService("RunService")
+        local UserInputService = game:GetService("UserInputService")
         local Workspace = game:GetService("Workspace")
 
         local espOn = false
@@ -95,7 +96,7 @@ activateBtn.MouseButton1Click:Connect(function()
         local rays = {}
         local flyBody = nil
 
-        -- TOGGLE BUTTON
+        -- TOGGLE BUTTON (CÓ KÉO THẢ)
         local toggleGui = Instance.new("ScreenGui")
         toggleGui.Name = "ToggleButton"
         toggleGui.Parent = LocalPlayer.PlayerGui
@@ -114,7 +115,31 @@ activateBtn.MouseButton1Click:Connect(function()
         stroke.Color = Color3.new(0, 1, 1)
         stroke.Thickness = 2
 
-        -- MAIN MENU (TO HƠN)
+        -- KÉO THẢ NÚT
+        local dragging = false
+        local dragStart = nil
+        local startPos = nil
+
+        toggleBtn.MouseButton1Down:Connect(function()
+            dragging = true
+            dragStart = UserInputService:GetMouseLocation()
+            startPos = toggleBtn.Position
+        end)
+
+        UserInputService.InputChanged:Connect(function(input)
+            if dragging and input.UserInputType == Enum.UserInputType.MouseMovement then
+                local delta = input.Position - dragStart
+                toggleBtn.Position = UDim2.new(startPos.X.Scale, startPos.X.Offset + delta.X, startPos.Y.Scale, startPos.Y.Offset + delta.Y)
+            end
+        end)
+
+        UserInputService.InputEnded:Connect(function(input)
+            if input.UserInputType == Enum.UserInputType.MouseButton1 then
+                dragging = false
+            end
+        end)
+
+        -- MAIN MENU
         local mainGui = Instance.new("ScreenGui")
         mainGui.Name = "Menu"
         mainGui.Parent = LocalPlayer.PlayerGui
@@ -161,19 +186,21 @@ activateBtn.MouseButton1Click:Connect(function()
             mainFrame.Visible = not mainFrame.Visible
         end)
 
-        -- PLAYER LIST (VỪA KHUNG MENU)
+        -- ===== PLAYER LIST (FIX LỆCH TÊN) =====
         local playerListFrame = Instance.new("ScrollingFrame")
-        playerListFrame.Size = UDim2.new(0.85, 0, 0, 90)
-        playerListFrame.Position = UDim2.new(0.075, 0, 0.60, 0)
+        playerListFrame.Size = UDim2.new(0.9, 0, 0, 100)
+        playerListFrame.Position = UDim2.new(0.05, 0, 0.58, 0)
         playerListFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.15)
         playerListFrame.BorderSizePixel = 0
         playerListFrame.Parent = mainFrame
         Instance.new("UICorner", playerListFrame).CornerRadius = UDim.new(0, 6)
         playerListFrame.Visible = false
         playerListFrame.CanvasSize = UDim2.new(0, 0, 0, 0)
+        playerListFrame.ScrollBarThickness = 4
+        playerListFrame.ScrollBarImageColor3 = Color3.new(1, 0.7, 0)
 
         local playerListLabel = Instance.new("TextLabel")
-        playerListLabel.Size = UDim2.new(1, 0, 0, 20)
+        playerListLabel.Size = UDim2.new(1, 0, 0, 22)
         playerListLabel.Text = "🎯 SELECT TARGET:"
         playerListLabel.TextColor3 = Color3.new(1, 0.7, 0)
         playerListLabel.TextScaled = true
@@ -182,14 +209,15 @@ activateBtn.MouseButton1Click:Connect(function()
         playerListLabel.Parent = playerListFrame
 
         local function updatePlayerList()
+            -- Xóa các nút cũ
             for _, v in pairs(playerListFrame:GetChildren()) do
                 if v:IsA("TextButton") then v:Destroy() end
             end
-            local y = 25
+            local y = 28
             for _, pl in pairs(Players:GetPlayers()) do
                 if pl ~= LocalPlayer then
                     local btn = Instance.new("TextButton")
-                    btn.Size = UDim2.new(1, -10, 0, 25)
+                    btn.Size = UDim2.new(1, -10, 0, 26)
                     btn.Position = UDim2.new(0.5, -5, 0, y)
                     btn.Text = pl.Name
                     btn.TextColor3 = Color3.new(1, 1, 1)
@@ -203,10 +231,10 @@ activateBtn.MouseButton1Click:Connect(function()
                         playerListFrame.Visible = false
                         tpBtn.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
                     end)
-                    y = y + 28
+                    y = y + 30
                 end
             end
-            playerListFrame.CanvasSize = UDim2.new(0, 0, 0, y)
+            playerListFrame.CanvasSize = UDim2.new(0, 0, 0, y + 10)
         end
 
         -- TP NOW
