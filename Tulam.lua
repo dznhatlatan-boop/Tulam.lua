@@ -1,11 +1,10 @@
 -- ============================================
--- TYRANT OF JURASSIC HUB (MENU BẬT TẮT)
--- Key: akgaming
+-- TYRANT OF JURASSIC HUB (MENU TO + TP FIX)
+-- Key: tan
 -- ============================================
 
-local key = "akgaming"
+local key = "tan"
 
--- KEY GUI
 local gui = Instance.new("ScreenGui")
 gui.Name = "KeySystem"
 gui.Parent = game.Players.LocalPlayer.PlayerGui
@@ -81,7 +80,7 @@ activateBtn.MouseButton1Click:Connect(function()
         print("🦖 TYRANT ACTIVATED!")
 
         -- ============================================
-        -- MAIN SCRIPT (MENU BẬT TẮT)
+        -- MAIN SCRIPT (MENU TO + TP FIX)
         -- ============================================
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
@@ -102,8 +101,8 @@ activateBtn.MouseButton1Click:Connect(function()
         toggleGui.Parent = LocalPlayer.PlayerGui
 
         local toggleBtn = Instance.new("TextButton")
-        toggleBtn.Size = UDim2.new(0, 50, 0, 50)
-        toggleBtn.Position = UDim2.new(0.92, -25, 0.8, -25)
+        toggleBtn.Size = UDim2.new(0, 55, 0, 55)
+        toggleBtn.Position = UDim2.new(0.92, -27, 0.8, -27)
         toggleBtn.Text = "⚡"
         toggleBtn.TextScaled = true
         toggleBtn.TextColor3 = Color3.new(0, 1, 1)
@@ -115,14 +114,14 @@ activateBtn.MouseButton1Click:Connect(function()
         stroke.Color = Color3.new(0, 1, 1)
         stroke.Thickness = 2
 
-        -- MAIN MENU
+        -- MAIN MENU (TO HƠN)
         local mainGui = Instance.new("ScreenGui")
         mainGui.Name = "Menu"
         mainGui.Parent = LocalPlayer.PlayerGui
 
         local mainFrame = Instance.new("Frame")
-        mainFrame.Size = UDim2.new(0, 200, 0, 280)
-        mainFrame.Position = UDim2.new(0.5, -100, 0.5, -140)
+        mainFrame.Size = UDim2.new(0, 220, 0, 320)
+        mainFrame.Position = UDim2.new(0.5, -110, 0.5, -160)
         mainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
         mainFrame.BackgroundTransparency = 0.2
         mainFrame.BorderSizePixel = 0
@@ -131,7 +130,7 @@ activateBtn.MouseButton1Click:Connect(function()
         Instance.new("UICorner", mainFrame).CornerRadius = UDim.new(0, 8)
 
         local title2 = Instance.new("TextLabel")
-        title2.Size = UDim2.new(1, 0, 0, 35)
+        title2.Size = UDim2.new(1, 0, 0, 40)
         title2.Text = "⚡ MENU"
         title2.TextColor3 = Color3.new(1, 1, 1)
         title2.TextScaled = true
@@ -141,7 +140,7 @@ activateBtn.MouseButton1Click:Connect(function()
 
         local function makeBtn(name, y, color)
             local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(0.85, 0, 0, 30)
+            btn.Size = UDim2.new(0.85, 0, 0, 32)
             btn.Position = UDim2.new(0.075, 0, y, 0)
             btn.Text = name
             btn.TextColor3 = Color3.new(1, 1, 1)
@@ -152,20 +151,20 @@ activateBtn.MouseButton1Click:Connect(function()
             return btn
         end
 
-        local rayBtn = makeBtn("🔴 RAY: OFF", 0.13)
-        local espBtn = makeBtn("🔵 ESP: OFF", 0.27)
-        local flyBtn = makeBtn("✈️ FLY: OFF", 0.41)
-        local tpBtn = makeBtn("🟢 TP: SELECT", 0.55)
-        local closeBtn = makeBtn("✕ CLOSE", 0.78, Color3.new(0.5, 0.1, 0.1))
+        local rayBtn = makeBtn("🔴 RAY: OFF", 0.11)
+        local espBtn = makeBtn("🔵 ESP: OFF", 0.23)
+        local flyBtn = makeBtn("✈️ FLY: OFF", 0.35)
+        local tpBtn = makeBtn("🟢 TP: SELECT", 0.47)
+        local closeBtn = makeBtn("✕ CLOSE", 0.68, Color3.new(0.5, 0.1, 0.1))
 
         toggleBtn.MouseButton1Click:Connect(function()
             mainFrame.Visible = not mainFrame.Visible
         end)
 
-        -- PLAYER LIST
+        -- PLAYER LIST (VỪA KHUNG MENU)
         local playerListFrame = Instance.new("ScrollingFrame")
-        playerListFrame.Size = UDim2.new(0.8, 0, 0, 80)
-        playerListFrame.Position = UDim2.new(0.1, 0, 0.70, 0)
+        playerListFrame.Size = UDim2.new(0.85, 0, 0, 90)
+        playerListFrame.Position = UDim2.new(0.075, 0, 0.60, 0)
         playerListFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.15)
         playerListFrame.BorderSizePixel = 0
         playerListFrame.Parent = mainFrame
@@ -213,7 +212,7 @@ activateBtn.MouseButton1Click:Connect(function()
         -- TP NOW
         local tpNowBtn = Instance.new("TextButton")
         tpNowBtn.Size = UDim2.new(0.4, 0, 0, 25)
-        tpNowBtn.Position = UDim2.new(0.3, 0, 0.70, 0)
+        tpNowBtn.Position = UDim2.new(0.3, 0, 0.68, 0)
         tpNowBtn.Text = "🚀 TP NOW"
         tpNowBtn.TextColor3 = Color3.new(1, 1, 1)
         tpNowBtn.BackgroundColor3 = Color3.new(0.6, 0.2, 0.2)
