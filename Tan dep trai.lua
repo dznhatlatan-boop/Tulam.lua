@@ -1,5 +1,5 @@
 -- ============================================
--- TÂN BÁ ĐẠO (Tyrant Hub) - Full Features
+-- TÂN BÁ ĐẠO (FIX TRÀN TP)
 -- ============================================
 
 local key = "tan"
@@ -79,7 +79,7 @@ activateBtn.MouseButton1Click:Connect(function()
         print("🔥 TÂN BÁ ĐẠO ACTIVATED!")
 
         -- ============================================
-        -- MAIN SCRIPT (FIX TP LỆCH)
+        -- MAIN SCRIPT (FIX TRÀN TP)
         -- ============================================
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
@@ -144,8 +144,8 @@ activateBtn.MouseButton1Click:Connect(function()
         mainGui.Parent = LocalPlayer.PlayerGui
 
         local mainFrame = Instance.new("Frame")
-        mainFrame.Size = UDim2.new(0, 220, 0, 320)
-        mainFrame.Position = UDim2.new(0.5, -110, 0.5, -160)
+        mainFrame.Size = UDim2.new(0, 220, 0, 340)
+        mainFrame.Position = UDim2.new(0.5, -110, 0.5, -170)
         mainFrame.BackgroundColor3 = Color3.new(0, 0, 0)
         mainFrame.BackgroundTransparency = 0.2
         mainFrame.BorderSizePixel = 0
@@ -164,7 +164,7 @@ activateBtn.MouseButton1Click:Connect(function()
 
         local function makeBtn(name, y, color)
             local btn = Instance.new("TextButton")
-            btn.Size = UDim2.new(0.85, 0, 0, 32)
+            btn.Size = UDim2.new(0.85, 0, 0, 30)
             btn.Position = UDim2.new(0.075, 0, y, 0)
             btn.Text = name
             btn.TextColor3 = Color3.new(1, 1, 1)
@@ -175,19 +175,19 @@ activateBtn.MouseButton1Click:Connect(function()
             return btn
         end
 
-        local rayBtn = makeBtn("🔴 RAY: OFF", 0.11)
-        local espBtn = makeBtn("🔵 ESP: OFF", 0.23)
-        local flyBtn = makeBtn("✈️ FLY: OFF", 0.35)
-        local tpBtn = makeBtn("🟢 TP: SELECT", 0.47)
-        local closeBtn = makeBtn("✕ CLOSE", 0.68, Color3.new(0.5, 0.1, 0.1))
+        local rayBtn = makeBtn("🔴 RAY: OFF", 0.10)
+        local espBtn = makeBtn("🔵 ESP: OFF", 0.22)
+        local flyBtn = makeBtn("✈️ FLY: OFF", 0.34)
+        local tpBtn = makeBtn("🟢 TP: SELECT", 0.46)
+        local closeBtn = makeBtn("✕ CLOSE", 0.64, Color3.new(0.5, 0.1, 0.1))
 
         toggleBtn.MouseButton1Click:Connect(function()
             mainFrame.Visible = not mainFrame.Visible
         end)
 
-        -- ===== PLAYER LIST (FIX LỆCH) =====
+        -- ===== PLAYER LIST (FIX TRÀN) =====
         local playerListFrame = Instance.new("ScrollingFrame")
-        playerListFrame.Size = UDim2.new(0.85, 0, 0, 100)
+        playerListFrame.Size = UDim2.new(0.85, 0, 0, 80)
         playerListFrame.Position = UDim2.new(0.075, 0, 0.58, 0)
         playerListFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.15)
         playerListFrame.BorderSizePixel = 0
@@ -199,7 +199,7 @@ activateBtn.MouseButton1Click:Connect(function()
         playerListFrame.ScrollBarImageColor3 = Color3.new(1, 0.7, 0)
 
         local playerListLabel = Instance.new("TextLabel")
-        playerListLabel.Size = UDim2.new(1, 0, 0, 22)
+        playerListLabel.Size = UDim2.new(1, 0, 0, 20)
         playerListLabel.Text = "🎯 SELECT TARGET:"
         playerListLabel.TextColor3 = Color3.new(1, 0.7, 0)
         playerListLabel.TextScaled = true
@@ -211,11 +211,11 @@ activateBtn.MouseButton1Click:Connect(function()
             for _, v in pairs(playerListFrame:GetChildren()) do
                 if v:IsA("TextButton") then v:Destroy() end
             end
-            local y = 28
+            local y = 25
             for _, pl in pairs(Players:GetPlayers()) do
                 if pl ~= LocalPlayer then
                     local btn = Instance.new("TextButton")
-                    btn.Size = UDim2.new(1, -10, 0, 26)
+                    btn.Size = UDim2.new(1, -10, 0, 24)
                     btn.Position = UDim2.new(0.5, -5, 0, y)
                     btn.Text = pl.Name
                     btn.TextColor3 = Color3.new(1, 1, 1)
@@ -229,7 +229,7 @@ activateBtn.MouseButton1Click:Connect(function()
                         playerListFrame.Visible = false
                         tpBtn.BackgroundColor3 = Color3.new(0.2, 0.6, 0.2)
                     end)
-                    y = y + 30
+                    y = y + 28
                 end
             end
             playerListFrame.CanvasSize = UDim2.new(0, 0, 0, y + 10)
