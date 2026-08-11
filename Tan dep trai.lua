@@ -1,6 +1,5 @@
 -- ============================================
--- TYRANT OF JURASSIC HUB (FIX TP + TÊN THẲNG)
--- Key: tan
+-- TÂN BÁ ĐẠO (Tyrant Hub) - Full Features
 -- ============================================
 
 local key = "tan"
@@ -31,7 +30,7 @@ Instance.new("UICorner", header).CornerRadius = UDim.new(0, 12)
 
 local title = Instance.new("TextLabel")
 title.Size = UDim2.new(1, 0, 0, 55)
-title.Text = "🦖 TYRANT OF JURASSIC HUB"
+title.Text = "🔥 TÂN BÁ ĐẠO"
 title.TextColor3 = Color3.new(1, 0.7, 0)
 title.TextScaled = true
 title.Font = Enum.Font.GothamBlack
@@ -77,10 +76,10 @@ activateBtn.MouseButton1Click:Connect(function()
         statusLabel.TextColor3 = Color3.new(0, 1, 0)
         task.wait(0.8)
         gui:Destroy()
-        print("🦖 TYRANT ACTIVATED!")
+        print("🔥 TÂN BÁ ĐẠO ACTIVATED!")
 
         -- ============================================
-        -- MAIN SCRIPT (FIX TP)
+        -- MAIN SCRIPT (FIX TP LỆCH)
         -- ============================================
         local Players = game:GetService("Players")
         local LocalPlayer = Players.LocalPlayer
@@ -96,7 +95,7 @@ activateBtn.MouseButton1Click:Connect(function()
         local rays = {}
         local flyBody = nil
 
-        -- TOGGLE BUTTON (CÓ KÉO THẢ)
+        -- TOGGLE BUTTON
         local toggleGui = Instance.new("ScreenGui")
         toggleGui.Name = "ToggleButton"
         toggleGui.Parent = LocalPlayer.PlayerGui
@@ -115,7 +114,7 @@ activateBtn.MouseButton1Click:Connect(function()
         stroke.Color = Color3.new(0, 1, 1)
         stroke.Thickness = 2
 
-        -- KÉO THẢ NÚT
+        -- DRAG
         local dragging = false
         local dragStart = nil
         local startPos = nil
@@ -186,10 +185,10 @@ activateBtn.MouseButton1Click:Connect(function()
             mainFrame.Visible = not mainFrame.Visible
         end)
 
-        -- ===== PLAYER LIST (FIX LỆCH TÊN) =====
+        -- ===== PLAYER LIST (FIX LỆCH) =====
         local playerListFrame = Instance.new("ScrollingFrame")
-        playerListFrame.Size = UDim2.new(0.9, 0, 0, 100)
-        playerListFrame.Position = UDim2.new(0.05, 0, 0.58, 0)
+        playerListFrame.Size = UDim2.new(0.85, 0, 0, 100)
+        playerListFrame.Position = UDim2.new(0.075, 0, 0.58, 0)
         playerListFrame.BackgroundColor3 = Color3.new(0.1, 0.1, 0.15)
         playerListFrame.BorderSizePixel = 0
         playerListFrame.Parent = mainFrame
@@ -209,7 +208,6 @@ activateBtn.MouseButton1Click:Connect(function()
         playerListLabel.Parent = playerListFrame
 
         local function updatePlayerList()
-            -- Xóa các nút cũ
             for _, v in pairs(playerListFrame:GetChildren()) do
                 if v:IsA("TextButton") then v:Destroy() end
             end
