@@ -77,7 +77,7 @@ MainFrame.Size = UDim2.new(0, 260, 0, 320)
 MainFrame.Position = UDim2.new(0.5, -130, 0.5, -160)
 MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 MainFrame.BorderSizePixel = 0
-MainFrame.Visible = false
+MainFrame.Visible = false -- Ẩn đi chờ nhập key
 MainFrame.Parent = ScreenGui
 
 local MainCorner = Instance.new("UICorner")
@@ -99,9 +99,9 @@ local TitleLabel = Instance.new("TextLabel")
 TitleLabel.Size = UDim2.new(0.6, 0, 1, 0)
 TitleLabel.Position = UDim2.new(0.05, 0, 0, 0)
 TitleLabel.BackgroundTransparency = 1
-TitleLabel.Text = "⚡ MENU"
+TitleLabel.Text = "⚡ MENU BY TAN"
 TitleLabel.TextColor3 = Color3.fromRGB(255, 255, 255)
-TitleLabel.TextSize = 16
+TitleLabel.TextSize = 15
 TitleLabel.Font = Enum.Font.GothamBold
 TitleLabel.TextXAlignment = Enum.TextXAlignment.Left
 TitleLabel.Parent = TopBar
@@ -178,8 +178,9 @@ local FloatCorner = Instance.new("UICorner")
 FloatCorner.CornerRadius = UDim.new(1, 0)
 FloatCorner.Parent = FloatButton
 
--- ================= LOGIC XỬ LÝ CHỨC NĂNG =================
+-- ================= XỬ LÝ LOGIC CHỨC NĂNG =================
 
+-- Kiểm tra Key
 SubmitBtn.MouseButton1Click:Connect(function()
     if KeyBox.Text == "speed" then
         KeyGui.Visible = false
@@ -228,7 +229,7 @@ JumpToggleBtn.MouseButton1Click:Connect(function()
     end
 end)
 
--- 3. Gọi trực tiếp FlyGuiV3 chuẩn từ link GitHub khi bấm nút
+-- 3. Mở FlyGuiV3
 FlyGuiBtn.MouseButton1Click:Connect(function()
     local success, err = pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
