@@ -44,31 +44,41 @@ Instance.new("UICorner", SubmitBtn)
 
 -- [MAIN MENU]
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 260, 0, 420)
-MainFrame.Position = UDim2.new(0.5, -130, 0.5, -210)
+MainFrame.Size = UDim2.new(0, 280, 0, 380)
+MainFrame.Position = UDim2.new(0.5, -140, 0.5, -190)
 MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 MainFrame.Visible = false
 Instance.new("UICorner", MainFrame)
 
+-- Tiêu đề Menu
+local MainTitle = Instance.new("TextLabel", MainFrame)
+MainTitle.Size = UDim2.new(1, 0, 0, 35)
+MainTitle.Text = "⚡ MENU BY TAN"
+MainTitle.TextColor3 = Color3.fromRGB(46, 204, 113)
+MainTitle.Font = Enum.Font.GothamBold
+MainTitle.TextSize = 15
+MainTitle.BackgroundTransparency = 1
+
 -- Ô nhập Speed
 local SpeedInput = Instance.new("TextBox", MainFrame)
-SpeedInput.Size = UDim2.new(0.9, 0, 0, 35)
-SpeedInput.Position = UDim2.new(0.05, 0, 0, 15)
-SpeedInput.PlaceholderText = "Số Speed (vd: 50)..."
+SpeedInput.Size = UDim2.new(0.9, 0, 0, 32)
+SpeedInput.Position = UDim2.new(0.05, 0, 0, 40)
+SpeedInput.PlaceholderText = "Nhập số Speed (vd: 50)..."
 SpeedInput.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 SpeedInput.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", SpeedInput)
 
 -- Ô nhập tên TP
 local TargetBox = Instance.new("TextBox", MainFrame)
-TargetBox.Size = UDim2.new(0.9, 0, 0, 35)
-TargetBox.Position = UDim2.new(0.05, 0, 0, 55)
+TargetBox.Size = UDim2.new(0.9, 0, 0, 32)
+TargetBox.Position = UDim2.new(0.05, 0, 0, 78)
 TargetBox.PlaceholderText = "Tên người cần TP..."
 TargetBox.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 TargetBox.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", TargetBox)
 
 -- [LOGIC KHÓA MỤC TIÊU (AIM BOT)]
 local Aiming = false
-local AimBtnText = "🎯 KHÓA MỤC TIÊU: TẮT"
 
 local function GetClosestTarget()
     local closestTarget = nil
@@ -78,7 +88,6 @@ local function GetClosestTarget()
     for _, p in pairs(Players:GetPlayers()) do
         if p ~= Player and p.Character and p.Character:FindFirstChild("HumanoidRootPart") and p.Character:FindFirstChild("Humanoid") then
             if p.Character.Humanoid.Health > 0 then
-                -- Ưu tiên khóa vào Đầu (Head), nếu không có thì khóa vào Thân (HumanoidRootPart)
                 local targetPart = p.Character:FindFirstChild("Head") or p.Character.HumanoidRootPart
                 local vector, onScreen = Camera:WorldToViewportPoint(targetPart.Position)
                 
@@ -100,22 +109,21 @@ RunService.RenderStepped:Connect(function()
     if Aiming then
         local targetPart = GetClosestTarget()
         if targetPart then
-            -- Khóa tâm camera thẳng vào đối thủ cực mượt
             Camera.CFrame = CFrame.new(Camera.CFrame.Position, targetPart.Position)
         end
     end
 end)
 
--- Tạo các nút bấm chức năng
+-- Hàm tạo nút bấm gọn gàng
 local function CreateBtn(name, posY, callback)
     local btn = Instance.new("TextButton", MainFrame)
-    btn.Size = UDim2.new(0.9, 0, 0, 38)
+    btn.Size = UDim2.new(0.9, 0, 0, 35)
     btn.Position = UDim2.new(0.05, 0, 0, posY)
     btn.Text = name
     btn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
     btn.TextColor3 = Color3.fromRGB(255, 255, 255)
     btn.Font = Enum.Font.GothamBold
-    btn.TextSize = 13
+    btn.TextSize = 12
     btn.MouseButton1Click:Connect(callback)
     Instance.new("UICorner", btn)
     return btn
@@ -132,25 +140,26 @@ SubmitBtn.MouseButton1Click:Connect(function()
     end
 end)
 
-CreateBtn("⚡ ÁP DỤNG SPEED", 100, function()
+CreateBtn("⚡ ÁP DỤNG SPEED", 118, function()
     local val = tonumber(SpeedInput.Text)
     if val and Player.Character and Player.Character:FindFirstChild("Humanoid") then
         Player.Character.Humanoid.WalkSpeed = val
     end
 end)
 
-local AimToggleButton = CreateBtn("🎯 KHÓA MỤC TIÊU: TẮT", 143, function()
+-- Nút Bật/Tắt Aim Bot chuẩn xác
+local AimToggleButton = CreateBtn("🎯 KHÓA MỤC TIÊU: TẮT", 158, function()
     Aiming = not Aiming
     if Aiming then
         AimToggleButton.Text = "🎯 KHÓA MỤC TIÊU: BẬT"
-        AimToggleButton.BackgroundColor3 = Color3.fromRGB(231, 76, 60) -- Đổi sang màu đỏ khi bật
+        AimToggleButton.BackgroundColor3 = Color3.fromRGB(231, 76, 60) -- Đỏ khi bật
     else
         AimToggleButton.Text = "🎯 KHÓA MỤC TIÊU: TẮT"
-        AimToggleButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Đổi về xanh khi tắt
+        AimToggleButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Xanh khi tắt
     end
 end)
 
-CreateBtn("📍 TP ĐẾN NGƯỜI CHỌN", 186, function()
+CreateBtn("📍 TP ĐẾN NGƯỜI CHỌN", 198, function()
     local targetName = TargetBox.Text
     for _, p in pairs(Players:GetPlayers()) do
         if string.sub(string.lower(p.Name), 1, #targetName) == string.lower(targetName) then
@@ -162,14 +171,15 @@ CreateBtn("📍 TP ĐẾN NGƯỜI CHỌN", 186, function()
     end
 end)
 
-CreateBtn("✈️ MỞ FLY GUI V3", 229, function()
+CreateBtn("✈️ MỞ FLY GUI V3", 238, function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
     end)
 end)
 
-CreateBtn("💀 RESET NHÂN VẬT", 272, function()
+CreateBtn("💀 RESET NHÂN VẬT", 278, function()
     if Player.Character and Player.Character:FindFirstChild("Humanoid") then
         Player.Character.Humanoid.Health = 0
     end
 end)
+
