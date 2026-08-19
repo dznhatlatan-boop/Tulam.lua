@@ -14,7 +14,20 @@ if PlayerGui:FindFirstChild("ByTanCustomHub") then PlayerGui.ByTanCustomHub:Dest
 local ScreenGui = Instance.new("ScreenGui", PlayerGui)
 ScreenGui.Name = "ByTanCustomHub"
 
--- [HỆ THỐNG KEY]
+-- [1. NÚT TRÒN NỔI BẬT ĐỂ BẬT/TẮT MENU]
+local FloatButton = Instance.new("TextButton", ScreenGui)
+FloatButton.Size = UDim2.new(0, 50, 0, 50)
+FloatButton.Position = UDim2.new(0.85, 0, 0.75, 0)
+FloatButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+FloatButton.BorderSizePixel = 0
+FloatButton.Text = "⚡"
+FloatButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+FloatButton.TextSize = 22
+FloatButton.Font = Enum.Font.GothamBold
+FloatButton.Visible = false -- Ẩn đi chờ nhập key xong mới hiện
+Instance.new("UICorner", FloatButton).CornerRadius = UDim.new(1, 0)
+
+-- [2. HỆ THỐNG KEY]
 local KeyGui = Instance.new("Frame", ScreenGui)
 KeyGui.Size = UDim2.new(0, 300, 0, 160)
 KeyGui.Position = UDim2.new(0.5, -150, 0.5, -80)
@@ -23,34 +36,38 @@ Instance.new("UICorner", KeyGui)
 
 local TitleKey = Instance.new("TextLabel", KeyGui)
 TitleKey.Size = UDim2.new(1, 0, 0, 40)
-TitleKey.Text = "NHẬP KEY: tan Make"
+TitleKey.Text = "NHẬP KEY: tan"
 TitleKey.TextColor3 = Color3.fromRGB(46, 204, 113)
 TitleKey.Font = Enum.Font.GothamBold
 TitleKey.TextSize = 16
+TitleKey.BackgroundTransparency = 1
 
 local KeyBox = Instance.new("TextBox", KeyGui)
 KeyBox.Size = UDim2.new(0.8, 0, 0, 40)
 KeyBox.Position = UDim2.new(0.1, 0, 0.3, 0)
 KeyBox.PlaceholderText = "Nhập key..."
+KeyBox.Text = ""
 KeyBox.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 KeyBox.TextColor3 = Color3.new(1, 1, 1)
+Instance.new("UICorner", KeyBox)
 
 local SubmitBtn = Instance.new("TextButton", KeyGui)
 SubmitBtn.Size = UDim2.new(0.8, 0, 0, 40)
 SubmitBtn.Position = UDim2.new(0.1, 0, 0.65, 0)
 SubmitBtn.Text = "XÁC NHẬN"
 SubmitBtn.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
+SubmitBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+SubmitBtn.Font = Enum.Font.GothamBold
 Instance.new("UICorner", SubmitBtn)
 
--- [MAIN MENU]
+-- [3. MAIN MENU]
 local MainFrame = Instance.new("Frame", ScreenGui)
-MainFrame.Size = UDim2.new(0, 280, 0, 380)
-MainFrame.Position = UDim2.new(0.5, -140, 0.5, -190)
+MainFrame.Size = UDim2.new(0, 260, 0, 350)
+MainFrame.Position = UDim2.new(0.5, -130, 0.5, -175)
 MainFrame.BackgroundColor3 = Color3.fromRGB(18, 18, 22)
 MainFrame.Visible = false
 Instance.new("UICorner", MainFrame)
 
--- Tiêu đề Menu
 local MainTitle = Instance.new("TextLabel", MainFrame)
 MainTitle.Size = UDim2.new(1, 0, 0, 35)
 MainTitle.Text = "⚡ MENU BY TAN"
@@ -61,23 +78,25 @@ MainTitle.BackgroundTransparency = 1
 
 -- Ô nhập Speed
 local SpeedInput = Instance.new("TextBox", MainFrame)
-SpeedInput.Size = UDim2.new(0.9, 0, 0, 32)
+SpeedInput.Size = UDim2.new(0.9, 0, 0, 35)
 SpeedInput.Position = UDim2.new(0.05, 0, 0, 40)
 SpeedInput.PlaceholderText = "Nhập số Speed (vd: 50)..."
+SpeedInput.Text = ""
 SpeedInput.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 SpeedInput.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", SpeedInput)
 
 -- Ô nhập tên TP
 local TargetBox = Instance.new("TextBox", MainFrame)
-TargetBox.Size = UDim2.new(0.9, 0, 0, 32)
-TargetBox.Position = UDim2.new(0.05, 0, 0, 78)
+TargetBox.Size = UDim2.new(0.9, 0, 0, 35)
+TargetBox.Position = UDim2.new(0.05, 0, 0, 80)
 TargetBox.PlaceholderText = "Tên người cần TP..."
+TargetBox.Text = ""
 TargetBox.BackgroundColor3 = Color3.fromRGB(35, 35, 42)
 TargetBox.TextColor3 = Color3.new(1, 1, 1)
 Instance.new("UICorner", TargetBox)
 
--- [LOGIC KHÓA MỤC TIÊU (AIM BOT)]
+-- [LOGIC KHÓA MỤC TIÊU]
 local Aiming = false
 
 local function GetClosestTarget()
@@ -114,7 +133,7 @@ RunService.RenderStepped:Connect(function()
     end
 end)
 
--- Hàm tạo nút bấm gọn gàng
+-- Hàm tạo nút bấm
 local function CreateBtn(name, posY, callback)
     local btn = Instance.new("TextButton", MainFrame)
     btn.Size = UDim2.new(0.9, 0, 0, 35)
@@ -129,37 +148,42 @@ local function CreateBtn(name, posY, callback)
     return btn
 end
 
--- [XỬ LÝ SỰ KIỆN]
+-- [SỰ KIỆN NÚT BẤM]
 SubmitBtn.MouseButton1Click:Connect(function()
-    if KeyBox.Text == "tan Make" then
+    if KeyBox.Text == "tan" then
         KeyGui.Visible = false
         MainFrame.Visible = true
+        FloatButton.Visible = true
     else
         KeyBox.Text = ""
-        KeyBox.PlaceholderText = "Sai Key! Nhập lại..."
+        KeyBox.PlaceholderText = "Sai Key! Nhập (tan)..."
     end
 end)
 
-CreateBtn("⚡ ÁP DỤNG SPEED", 118, function()
+-- Bấm vào nút tròn nổi để Bật/Tắt (Ẩn/Hiện) Menu chính
+FloatButton.MouseButton1Click:Connect(function()
+    MainFrame.Visible = not MainFrame.Visible
+end)
+
+CreateBtn("⚡ ÁP DỤNG SPEED", 125, function()
     local val = tonumber(SpeedInput.Text)
     if val and Player.Character and Player.Character:FindFirstChild("Humanoid") then
         Player.Character.Humanoid.WalkSpeed = val
     end
 end)
 
--- Nút Bật/Tắt Aim Bot chuẩn xác
-local AimToggleButton = CreateBtn("🎯 KHÓA MỤC TIÊU: TẮT", 158, function()
+local AimToggleButton = CreateBtn("🎯 KHÓA MỤC TIÊU: TẮT", 165, function()
     Aiming = not Aiming
     if Aiming then
         AimToggleButton.Text = "🎯 KHÓA MỤC TIÊU: BẬT"
-        AimToggleButton.BackgroundColor3 = Color3.fromRGB(231, 76, 60) -- Đỏ khi bật
+        AimToggleButton.BackgroundColor3 = Color3.fromRGB(231, 76, 60)
     else
         AimToggleButton.Text = "🎯 KHÓA MỤC TIÊU: TẮT"
-        AimToggleButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113) -- Xanh khi tắt
+        AimToggleButton.BackgroundColor3 = Color3.fromRGB(46, 204, 113)
     end
 end)
 
-CreateBtn("📍 TP ĐẾN NGƯỜI CHỌN", 198, function()
+CreateBtn("📍 TP ĐẾN NGƯỜI CHỌN", 205, function()
     local targetName = TargetBox.Text
     for _, p in pairs(Players:GetPlayers()) do
         if string.sub(string.lower(p.Name), 1, #targetName) == string.lower(targetName) then
@@ -171,15 +195,14 @@ CreateBtn("📍 TP ĐẾN NGƯỜI CHỌN", 198, function()
     end
 end)
 
-CreateBtn("✈️ MỞ FLY GUI V3", 238, function()
+CreateBtn("✈️ MỞ FLY GUI V3", 245, function()
     pcall(function()
         loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))()
     end)
 end)
 
-CreateBtn("💀 RESET NHÂN VẬT", 278, function()
+CreateBtn("💀 RESET NHÂN VẬT", 285, function()
     if Player.Character and Player.Character:FindFirstChild("Humanoid") then
         Player.Character.Humanoid.Health = 0
     end
 end)
-
