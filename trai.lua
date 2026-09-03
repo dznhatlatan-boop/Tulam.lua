@@ -1,210 +1,210 @@
 -- [[ Server Hub - No Key / Free - Credit: tan ]] --
-local _G_Svc = game
-local _Plrs = _G_Svc:GetService("Players")
-local _TpSvc = _G_Svc:GetService("TeleportService")
-local _Http = _G_Svc:GetService("HttpService")
-local _UIS = _G_Svc:GetService("UserInputService")
-local _LPlayer = _Plrs.LocalPlayer
-local _CGui = _G_Svc:GetService("CoreGui")
+local _SvcX = game
+local _Usrs = _SvcX:GetService("Players")
+local _TpRt = _SvcX:GetService("TeleportService")
+local _NetF = _SvcX:GetService("HttpService")
+local _InpS = _SvcX:GetService("UserInputService")
+local _MePlr = _Usrs.LocalPlayer
+local _CoreG = _SvcX:GetService("CoreGui")
 
-if _CGui:FindFirstChild("ServerPickerHub") then
-    _CGui.ServerPickerHub:Destroy()
+if _CoreG:FindFirstChild("ServerPickerHub") then
+    _CoreG.ServerPickerHub:Destroy()
 end
 
-local _GuiMain = Instance.new("ScreenGui")
-_GuiMain.Name = "ServerPickerHub"
-_GuiMain.Parent = _CGui
-_GuiMain.ResetOnSpawn = false
+local _RootGui = Instance.new("ScreenGui")
+_RootGui.Name = "ServerPickerHub"
+_RootGui.Parent = _CoreG
+_RootGui.ResetOnSpawn = false
 
-local function _Notify(_t, _m, _d)
-    if _GuiMain:FindFirstChild("ActiveNotify") then
-        _GuiMain.ActiveNotify:Destroy()
+local function _ShowPop(_head, _desc, _dur)
+    if _RootGui:FindFirstChild("ActiveNotify") then
+        _RootGui.ActiveNotify:Destroy()
     end
 
-    local _NF = Instance.new("Frame")
-    _NF.Name = "ActiveNotify"
-    _NF.Size = UDim2.new(0, 280, 0, 65)
-    _NF.Position = UDim2.new(1, 300, 0.1, 0)
-    _NF.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
-    _NF.BorderSizePixel = 0
-    _NF.Parent = _GuiMain
+    local _BoxF = Instance.new("Frame")
+    _BoxF.Name = "ActiveNotify"
+    _BoxF.Size = UDim2.new(0, 280, 0, 65)
+    _BoxF.Position = UDim2.new(1, 300, 0.1, 0)
+    _BoxF.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+    _BoxF.BorderSizePixel = 0
+    _BoxF.Parent = _RootGui
 
-    local _NC = Instance.new("UICorner")
-    _NC.CornerRadius = UDim.new(0, 8)
-    _NC.Parent = _NF
+    local _BCor = Instance.new("UICorner")
+    _BCor.CornerRadius = UDim.new(0, 8)
+    _BCor.Parent = _BoxF
 
-    local _NS = Instance.new("UIStroke")
-    _NS.Color = Color3.fromRGB(0, 160, 255)
-    _NS.Transparency = 0.3
-    _NS.Thickness = 1.5
-    _NS.Parent = _NF
+    local _BStr = Instance.new("UIStroke")
+    _BStr.Color = Color3.fromRGB(0, 160, 255)
+    _BStr.Transparency = 0.3
+    _BStr.Thickness = 1.5
+    _BStr.Parent = _BoxF
 
-    local _NT = Instance.new("TextLabel")
-    _NT.Size = UDim2.new(1, -20, 0, 22)
-    _NT.Position = UDim2.new(0, 15, 0, 6)
-    _NT.BackgroundTransparency = 1
-    _NT.Text = _t
-    _NT.TextColor3 = Color3.fromRGB(0, 190, 255)
-    _NT.TextSize = 12
-    _NT.Font = Enum.Font.GothamBold
-    _NT.TextXAlignment = Enum.TextXAlignment.Left
-    _NT.Parent = _NF
+    local _TxtH = Instance.new("TextLabel")
+    _TxtH.Size = UDim2.new(1, -20, 0, 22)
+    _TxtH.Position = UDim2.new(0, 15, 0, 6)
+    _TxtH.BackgroundTransparency = 1
+    _TxtH.Text = _head
+    _TxtH.TextColor3 = Color3.fromRGB(0, 190, 255)
+    _TxtH.TextSize = 12
+    _TxtH.Font = Enum.Font.GothamBold
+    _TxtH.TextXAlignment = Enum.TextXAlignment.Left
+    _TxtH.Parent = _BoxF
 
-    local _NSub = Instance.new("TextLabel")
-    _NSub.Size = UDim2.new(1, -20, 0, 30)
-    _NSub.Position = UDim2.new(0, 15, 0, 28)
-    _NSub.BackgroundTransparency = 1
-    _NSub.Text = _m
-    _NSub.TextColor3 = Color3.fromRGB(200, 220, 240)
-    _NSub.TextSize = 11
-    _NSub.Font = Enum.Font.Gotham
-    _NSub.TextXAlignment = Enum.TextXAlignment.Left
-    _NSub.TextWrapped = true
-    _NSub.Parent = _NF
+    local _TxtD = Instance.new("TextLabel")
+    _TxtD.Size = UDim2.new(1, -20, 0, 30)
+    _TxtD.Position = UDim2.new(0, 15, 0, 28)
+    _TxtD.BackgroundTransparency = 1
+    _TxtD.Text = _desc
+    _TxtD.TextColor3 = Color3.fromRGB(200, 220, 240)
+    _TxtD.TextSize = 11
+    _TxtD.Font = Enum.Font.Gotham
+    _TxtD.TextXAlignment = Enum.TextXAlignment.Left
+    _TxtD.TextWrapped = true
+    _TxtD.Parent = _BoxF
 
-    _NF:TweenPosition(UDim2.new(1, -295, 0.1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.4, true)
+    _BoxF:TweenPosition(UDim2.new(1, -295, 0.1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.4, true)
 
     task.spawn(function()
-        task.wait(_d or 4)
-        if _NF and _NF.Parent then
-            _NF:TweenPosition(UDim2.new(1, 300, 0.1, 0), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.3, true)
+        task.wait(_dur or 4)
+        if _BoxF and _BoxF.Parent then
+            _BoxF:TweenPosition(UDim2.new(1, 300, 0.1, 0), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.3, true)
             task.wait(0.3)
-            _NF:Destroy()
+            _BoxF:Destroy()
         end
     end)
 end
 
 -- ==================== GIAO DIỆN CHÍNH ====================
-local _MainF = Instance.new("Frame")
-_MainF.Size = UDim2.new(0, 300, 0, 360)
-_MainF.Position = UDim2.new(0.02, 0, 0.18, 0)
-_MainF.BackgroundColor3 = Color3.fromRGB(10, 14, 22)
-_MainF.BorderSizePixel = 0
-_MainF.Active = true
-_MainF.Draggable = true
-_MainF.Parent = _GuiMain
+local _MainWin = Instance.new("Frame")
+_MainWin.Size = UDim2.new(0, 300, 0, 360)
+_MainWin.Position = UDim2.new(0.02, 0, 0.18, 0)
+_MainWin.BackgroundColor3 = Color3.fromRGB(10, 14, 22)
+_MainWin.BorderSizePixel = 0
+_MainWin.Active = true
+_MainWin.Draggable = true
+_MainWin.Parent = _RootGui
 
-local _MFC = Instance.new("UICorner")
-_MFC.CornerRadius = UDim.new(0, 12)
-_MFC.Parent = _MainF
+local _MWCor = Instance.new("UICorner")
+_MWCor.CornerRadius = UDim.new(0, 12)
+_MWCor.Parent = _MainWin
 
-local _MFS = Instance.new("UIStroke")
-_MFS.Color = Color3.fromRGB(0, 150, 255)
-_MFS.Transparency = 0.2
-_MFS.Thickness = 2
-_MFS.Parent = _MainF
+local _MWStr = Instance.new("UIStroke")
+_MWStr.Color = Color3.fromRGB(0, 150, 255)
+_MWStr.Transparency = 0.2
+_MWStr.Thickness = 2
+_MWStr.Parent = _MainWin
 
-local _TitleL = Instance.new("TextLabel")
-_TitleL.Size = UDim2.new(1, -45, 0, 38)
-_TitleL.Position = UDim2.new(0, 12, 0, 0)
-_TitleL.BackgroundTransparency = 1
-_TitleL.Text = "✨ SERVER HUB - by tan ✨"
-_TitleL.TextColor3 = Color3.fromRGB(0, 190, 255)
-_TitleL.TextSize = 12
-_TitleL.Font = Enum.Font.GothamBold
-_TitleL.TextXAlignment = Enum.TextXAlignment.Left
-_TitleL.Parent = _MainF
+local _TitleLab = Instance.new("TextLabel")
+_TitleLab.Size = UDim2.new(1, -45, 0, 38)
+_TitleLab.Position = UDim2.new(0, 12, 0, 0)
+_TitleLab.BackgroundTransparency = 1
+_TitleLab.Text = "✨ SERVER HUB - by tan ✨"
+_TitleLab.TextColor3 = Color3.fromRGB(0, 190, 255)
+_TitleLab.TextSize = 12
+_TitleLab.Font = Enum.Font.GothamBold
+_TitleLab.TextXAlignment = Enum.TextXAlignment.Left
+_TitleLab.Parent = _MainWin
 
-local _TglBtn = Instance.new("TextButton")
-_TglBtn.Size = UDim2.new(0, 28, 0, 28)
-_TglBtn.Position = UDim2.new(1, -34, 0, 5)
-_TglBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 48)
-_TglBtn.Text = "-"
-_TglBtn.TextColor3 = Color3.fromRGB(0, 190, 255)
-_TglBtn.TextSize = 16
-_TglBtn.Font = Enum.Font.GothamBold
-_TglBtn.Parent = _MainF
+local _MinBtn = Instance.new("TextButton")
+_MinBtn.Size = UDim2.new(0, 28, 0, 28)
+_MinBtn.Position = UDim2.new(1, -34, 0, 5)
+_MinBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 48)
+_MinBtn.Text = "-"
+_MinBtn.TextColor3 = Color3.fromRGB(0, 190, 255)
+_MinBtn.TextSize = 16
+_MinBtn.Font = Enum.Font.GothamBold
+_MinBtn.Parent = _MainWin
 
-local _TglC = Instance.new("UICorner")
-_TglC.CornerRadius = UDim.new(0, 6)
-_TglC.Parent = _TglBtn
+local _MBCor = Instance.new("UICorner")
+_MBCor.CornerRadius = UDim.new(0, 6)
+_MBCor.Parent = _MinBtn
 
-local _Container = Instance.new("Frame")
-_Container.Size = UDim2.new(1, 0, 1, -38)
-_Container.Position = UDim2.new(0, 0, 0, 38)
-_Container.BackgroundTransparency = 1
-_Container.Parent = _MainF
+local _BodyF = Instance.new("Frame")
+_BodyF.Size = UDim2.new(1, 0, 1, -38)
+_BodyF.Position = UDim2.new(0, 0, 0, 38)
+_BodyF.BackgroundTransparency = 1
+_BodyF.Parent = _MainWin
 
-local _MinState = false
-_TglBtn.MouseButton1Click:Connect(function()
-    _MinState = not _MinState
-    if _MinState then
-        _Container.Visible = false
-        _MainF:TweenSize(UDim2.new(0, 300, 0, 38), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
-        _TglBtn.Text = "+"
+local _IsMin = false
+_MinBtn.MouseButton1Click:Connect(function()
+    _IsMin = not _IsMin
+    if _IsMin then
+        _BodyF.Visible = false
+        _MainWin:TweenSize(UDim2.new(0, 300, 0, 38), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+        _MinBtn.Text = "+"
     else
-        _MainF:TweenSize(UDim2.new(0, 300, 0, 360), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+        _MainWin:TweenSize(UDim2.new(0, 300, 0, 360), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
         task.wait(0.2)
-        _Container.Visible = true
-        _TglBtn.Text = "-"
+        _BodyF.Visible = true
+        _MinBtn.Text = "-"
     end
 end)
 
-local _UInfo = Instance.new("TextLabel")
-_UInfo.Size = UDim2.new(0.92, 0, 0, 26)
-_UInfo.Position = UDim2.new(0.04, 0, 0.02, 0)
-_UInfo.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
-_UInfo.BorderSizePixel = 0
-_UInfo.Text = "  👤 Acc: " .. _LPlayer.DisplayName .. " (@" .. _LPlayer.Name .. ")"
-_UInfo.TextColor3 = Color3.fromRGB(255, 215, 0)
-_UInfo.TextSize = 11
-_UInfo.Font = Enum.Font.GothamSemibold
-_UInfo.TextXAlignment = Enum.TextXAlignment.Left
-_UInfo.Parent = _Container
+local _UsrBox = Instance.new("TextLabel")
+_UsrBox.Size = UDim2.new(0.92, 0, 0, 26)
+_UsrBox.Position = UDim2.new(0.04, 0, 0.02, 0)
+_UsrBox.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+_UsrBox.BorderSizePixel = 0
+_UsrBox.Text = "  👤 Acc: " .. _MePlr.DisplayName .. " (@" .. _MePlr.Name .. ")"
+_UsrBox.TextColor3 = Color3.fromRGB(255, 215, 0)
+_UsrBox.TextSize = 11
+_UsrBox.Font = Enum.Font.GothamSemibold
+_UsrBox.TextXAlignment = Enum.TextXAlignment.Left
+_UsrBox.Parent = _BodyF
 
-local _UC = Instance.new("UICorner")
-_UC.CornerRadius = UDim.new(0, 6)
-_UC.Parent = _UInfo
+local _UBCor = Instance.new("UICorner")
+_UBCor.CornerRadius = UDim.new(0, 6)
+_UBCor.Parent = _UsrBox
 
-local _DevStr = "Điện thoại (Mobile)"
-if _UIS.KeyboardEnabled and _UIS.MouseEnabled then
-    _DevStr = "Máy tính (PC)"
+local _DevName = "Điện thoại (Mobile)"
+if _InpS.KeyboardEnabled and _InpS.MouseEnabled then
+    _DevName = "Máy tính (PC)"
 end
 
-local _DInfo = Instance.new("TextLabel")
-_DInfo.Size = UDim2.new(0.92, 0, 0, 26)
-_DInfo.Position = UDim2.new(0.04, 0, 0.11, 0)
-_DInfo.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
-_DInfo.BorderSizePixel = 0
-_DInfo.Text = "  🎮 Thiết bị: " .. _DevStr
-_DInfo.TextColor3 = Color3.fromRGB(0, 255, 150)
-_DInfo.TextSize = 11
-_DInfo.Font = Enum.Font.GothamSemibold
-_DInfo.TextXAlignment = Enum.TextXAlignment.Left
-_DInfo.Parent = _Container
+local _DevBox = Instance.new("TextLabel")
+_DevBox.Size = UDim2.new(0.92, 0, 0, 26)
+_DevBox.Position = UDim2.new(0.04, 0, 0.11, 0)
+_DevBox.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+_DevBox.BorderSizePixel = 0
+_DevBox.Text = "  🎮 Thiết bị: " .. _DevName
+_DevBox.TextColor3 = Color3.fromRGB(0, 255, 150)
+_DevBox.TextSize = 11
+_DevBox.Font = Enum.Font.GothamSemibold
+_DevBox.TextXAlignment = Enum.TextXAlignment.Left
+_DevBox.Parent = _BodyF
 
-local _DC = Instance.new("UICorner")
-_DC.CornerRadius = UDim.new(0, 6)
-_DC.Parent = _DInfo
+local _DBCor = Instance.new("UICorner")
+_DBCor.CornerRadius = UDim.new(0, 6)
+_DBCor.Parent = _DevBox
 
-local _CName = "Unknown"
+local _ExecName = "Unknown"
 if identifyexecutor then
     local _s, _r = pcall(identifyexecutor)
-    if _s and _r then _CName = tostring(_r) end
+    if _s and _r then _ExecName = tostring(_r) end
 elseif getexecutorname then
     local _s, _r = pcall(getexecutorname)
-    if _s and _r then _CName = tostring(_r) end
+    if _s and _r then _ExecName = tostring(_r) end
 elseif syn then
-    _CName = "Synapse X"
+    _ExecName = "Synapse X"
 elseif Delta then
-    _CName = "Delta"
+    _ExecName = "Delta"
 end
 
-local _CInfo = Instance.new("TextLabel")
-_CInfo.Size = UDim2.new(0.92, 0, 0, 26)
-_CInfo.Position = UDim2.new(0.04, 0, 0.20, 0)
-_CInfo.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
-_CInfo.BorderSizePixel = 0
-_CInfo.Text = "  ⚙️ Client: " .. _CName
-_CInfo.TextColor3 = Color3.fromRGB(255, 120, 120)
-_CInfo.TextSize = 11
-_CInfo.Font = Enum.Font.GothamSemibold
-_CInfo.TextXAlignment = Enum.TextXAlignment.Left
-_CInfo.Parent = _Container
+local _ExecBox = Instance.new("TextLabel")
+_ExecBox.Size = UDim2.new(0.92, 0, 0, 26)
+_ExecBox.Position = UDim2.new(0.04, 0, 0.20, 0)
+_ExecBox.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+_ExecBox.BorderSizePixel = 0
+_ExecBox.Text = "  ⚙️ Client: " .. _ExecName
+_ExecBox.TextColor3 = Color3.fromRGB(255, 120, 120)
+_ExecBox.TextSize = 11
+_ExecBox.Font = Enum.Font.GothamSemibold
+_ExecBox.TextXAlignment = Enum.TextXAlignment.Left
+_ExecBox.Parent = _BodyF
 
-local _CC = Instance.new("UICorner")
-_CC.CornerRadius = UDim.new(0, 6)
-_CC.Parent = _CInfo
+local _EBCor = Instance.new("UICorner")
+_EBCor.CornerRadius = UDim.new(0, 6)
+_EBCor.Parent = _ExecBox
 
 local _ScanBtn = Instance.new("TextButton")
 _ScanBtn.Size = UDim2.new(0.92, 0, 0, 38)
@@ -214,15 +214,112 @@ _ScanBtn.Text = "QUÉT DANH SÁCH SERVER"
 _ScanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 _ScanBtn.TextSize = 12
 _ScanBtn.Font = Enum.Font.GothamBold
-_ScanBtn.Parent = _Container
+_ScanBtn.Parent = _BodyF
 
-local _SBtnC = Instance.new("UICorner")
-_SBtnC.CornerRadius = UDim.new(0, 8)
-_SBtnC.Parent = _ScanBtn
+local _SBCor = Instance.new("UICorner")
+_SBCor.CornerRadius = UDim.new(0, 8)
+_SBCor.Parent = _ScanBtn
 
-local _ScrollF = Instance.new("ScrollingFrame")
-_ScrollF.Size = UDim2.new(0.92, 0, 0, 175)
-_ScrollF.Position = UDim2.new(0.04, 0, 0.45Dạ, nghe bạn than là thấy mệt ngang luôn rồi đó! Không biết là bạn đang bị rắc rối với việc khóa màn hình điện thoại, khóa tài khoản, hay là lỡ quên mật khẩu gì mà bực mình dữ vậy? 
+local _ScrollArea = Instance.new("ScrollingFrame")
+_ScrollArea.Size = UDim2.new(0.92, 0, 0, 175)
+_ScrollArea.Position = UDim2.new(0.04, 0, 0.45, 0)
+_ScrollArea.BackgroundColor3 = Color3.fromRGB(6, 9, 15)
+_ScrollArea.BorderSizePixel = 0
+_ScrollArea.CanvasSize = UDim2.new(0, 0, 0, 0)
+_ScrollArea.ScrollBarThickness = 4
+_ScrollArea.Parent = _BodyF
 
-Bạn cần mình hỗ trợ gỡ rối hoặc tìm cách mở khóa cái gì thì cứ nói cụ thể nha, để mình hướng dẫn cho lẹ chứ khỏi phải mò mẫm mệt lắm!
+local _SACor = Instance.new("UICorner")
+_SACor.CornerRadius = UDim.new(0, 8)
+_SACor.Parent = _ScrollArea
+
+local _UIList = Instance.new("UIListLayout")
+_UIList.SortOrder = Enum.SortOrder.LayoutOrder
+_UIList.Padding = UDim.new(0, 6)
+_UIList.Parent = _ScrollArea
+
+local function _WipeList()
+    for _, _v in ipairs(_ScrollArea:GetChildren()) do
+        if _v:IsA("Frame") then
+            _v:Destroy()
+        end
+    end
+end
+
+local function _ExecuteScan()
+    _WipeList()
+    _ShowPop("ĐANG QUÉT", "Đang tìm kiếm các server vắng...", 2)
+    _ScanBtn.Text = "Đang quét..."
     
+    local _CurrPlace = _SvcX.PlaceId
+    local _RawList = {}
+    local _OkFlag = pcall(function()
+        local _Endpoint = "https://games.roblox.com/v1/games/" .. _CurrPlace .. "/servers/Public?sortOrder=Asc&limit=100"
+        local _RawData = _SvcX:HttpGet(_Endpoint)
+        local _Decoded = _NetF:JSONDecode(_RawData)
+        _RawList = _Decoded.data
+    end)
+
+    if _OkFlag and _RawList then
+        local _FoundCount = 0
+        for _, _srvInfo in ipairs(_RawList) do
+            local _PCount = _srvInfo.playing
+            local _MCount = _srvInfo.maxPlayers
+            
+            if _PCount >= 1 and _PCount <= 5 and _srvInfo.id ~= _SvcX.JobId then
+                _FoundCount = _FoundCount + 1
+                
+                local _Card = Instance.new("Frame")
+                _Card.Size = UDim2.new(1, -6, 0, 35)
+                _Card.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+                _Card.BorderSizePixel = 0
+                _Card.Parent = _ScrollArea
+
+                local _CCor = Instance.new("UICorner")
+                _CCor.CornerRadius = UDim.new(0, 6)
+                _CCor.Parent = _Card
+
+                local _CardLbl = Instance.new("TextLabel")
+                _CardLbl.Size = UDim2.new(0.6, 0, 1, 0)
+                _CardLbl.Position = UDim2.new(0.05, 0, 0, 0)
+                _CardLbl.BackgroundTransparency = 1
+                _CardLbl.Text = "👥 " .. _PCount .. " / " .. _MCount .. " người"
+                _CardLbl.TextColor3 = Color3.fromRGB(0, 255, 150)
+                _CardLbl.TextSize = 11
+                _CardLbl.Font = Enum.Font.GothamBold
+                _CardLbl.TextXAlignment = Enum.TextXAlignment.Left
+                _CardLbl.Parent = _Card
+
+                local _JumpBtn = Instance.new("TextButton")
+                _JumpBtn.Size = UDim2.new(0.32, 0, 0.76, 0)
+                _JumpBtn.Position = UDim2.new(0.65, 0, 0.12, 0)
+                _JumpBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
+                _JumpBtn.Text = "Vào Ngay"
+                _JumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                _JumpBtn.TextSize = 11
+                _JumpBtn.Font = Enum.Font.GothamBold
+                _JumpBtn.Parent = _Card
+
+                local _JBCor = Instance.new("UICorner")
+                _JBCor.CornerRadius = UDim.new(0, 5)
+                _JBCor.Parent = _JumpBtn
+
+                _JumpBtn.MouseButton1Click:Connect(function()
+                    _ShowPop("ĐANG BAY", "Đang kết nối vào server...", 2)
+                    _TpRt:TeleportToPlaceInstance(_CurrPlace, _srvInfo.id, _MePlr)
+                end)
+            end
+        end
+        
+        _ScrollArea.CanvasSize = UDim2.new(0, 0, 0, _FoundCount * 41)
+        _ShowPop("HOÀN TẤT", "Tìm thấy " .. _FoundCount .. " server vắng.", 3)
+    else
+        _ShowPop("LỖI", "Không thể lấy danh sách server!", 3)
+    end
+    
+    _ScanBtn.Text = "QUÉT DANH SÁCH SERVER"
+end
+
+_ScanBtn.MouseButton1Click:Connect(function()
+    task.spawn(_ExecuteScan)
+end)
