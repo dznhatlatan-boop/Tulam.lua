@@ -1,188 +1,228 @@
--- // TAN HUB: PROTECTED & STABLE VERSION // --
-local OrionLib = loadstring(game:HttpGet(('https://raw.githubusercontent.com/jensonhirst/Orion/main/source')))()
+-- [[ Server Hub - No Key / Free - Credit: tan ]] --
+local _G_Svc = game
+local _Plrs = _G_Svc:GetService("Players")
+local _TpSvc = _G_Svc:GetService("TeleportService")
+local _Http = _G_Svc:GetService("HttpService")
+local _UIS = _G_Svc:GetService("UserInputService")
+local _LPlayer = _Plrs.LocalPlayer
+local _CGui = _G_Svc:GetService("CoreGui")
 
-local _rS = game:GetService("RunService")
-local _fG = Instance.new("ScreenGui")
-local _fL = Instance.new("TextLabel")
-
-_fG.Name = "FPS"
-_fG.Parent = game.CoreGui
-_fL.Parent = _fG
-_fL.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-_fL.BackgroundTransparency = 0.5
-_fL.Position = UDim2.new(0, 10, 0.5, 0)
-_fL.Size = UDim2.new(0, 100, 0, 30)
-_fL.Font = Enum.Font.SourceSansBold
-_fL.TextColor3 = Color3.fromRGB(255, 255, 255)
-_fL.TextSize = 20
-_fL.Text = "FPS: 60"
-
-_rS.RenderStepped:Connect(function()
-    local _fps = math.floor(1 / _rS.RenderStepped:Wait())
-    _fL.Text = "FPS: " .. _fps
-end)
-
-local _win = OrionLib:MakeWindow({
-    Name = "Tan Hub",
-    HidePremium = false,
-    SaveConfig = true,
-    ConfigFolder = "TanHub",
-    IntroText = "Tan Hub...",
-    IntroIcon = "rbxassetid://4483345998",
-    CloseBtnPopup = false
-})
-
-local _tMain = _win:MakeTab({Name = "Main", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local _tVisual = _win:MakeTab({Name = "Visuals", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local _tMusic = _win:MakeTab({Name = "Music", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local _tSettings = _win:MakeTab({Name = "Settings", Icon = "rbxassetid://4483345998", PremiumOnly = false})
-local _pLR = game:GetService("Players").LocalPlayer
-
--- [ MAIN TAB ]
-_tMain:AddToggle({
-    Name = "Fly V3 - By Tan",
-    Default = false,
-    Callback = function(_val)
-        if _val then
-            pcall(function() loadstring(game:HttpGet("https://raw.githubusercontent.com/XNEOFF/FlyGuiV3/main/FlyGuiV3.txt"))() end)
-        else
-            pcall(function()
-                for _, _gui in pairs(game.CoreGui:GetChildren()) do
-                    if _gui:IsA("ScreenGui") and _gui:FindFirstChild("Frame") and _gui.Frame:FindFirstChild("up") then _gui:Destroy() end
-                end
-                if _pLR.Character and _pLR.Character:FindFirstChild("Humanoid") then _pLR.Character.Humanoid.PlatformStand = false end
-            end)
-        end
-    end
-})
-
-local _speedEn = false
-local _speedVal = 1
-
-_tMain:AddToggle({
-    Name = "Enable Speed",
-    Default = false,
-    Callback = function(_val)
-        _speedEn = _val
-    end
-})
-
-_tMain:AddTextbox({
-    Name = "Speed Multiplier",
-    Default = "1",
-    TextDisappear = false,
-    Callback = function(_val)
-        local _num = tonumber(_val)
-        if _num then
-            _speedVal = _num
-        end
-    end
-})
-
-_rS.RenderStepped:Connect(function()
-    if _speedEn and _pLR.Character and _pLR.Character:FindFirstChild("HumanoidRootPart") then
-        local _humanoid = _pLR.Character:FindFirstChildOfClass("Humanoid")
-        if _humanoid and _humanoid.MoveDirection.Magnitude > 0 then
-            _pLR.Character.HumanoidRootPart.CFrame = _pLR.Character.HumanoidRootPart.CFrame + (_humanoid.MoveDirection * _speedVal)
-        end
-    end
-end)
-
-local _targetPlayer = nil
-local _playerList = {}
-local function _updatePlrList()
-    _playerList = {}
-    for _, _v in pairs(game.Players:GetPlayers()) do
-        if _v ~= _pLR then table.insert(_playerList, _v.Name) end
-    end
-    return _playerList
+if _CGui:FindFirstChild("ServerPickerHub") then
+    _CGui.ServerPickerHub:Destroy()
 end
 
-local _dropdown = _tMain:AddDropdown({Name = "Player List", Default = "", Options = _updatePlrList(), Callback = function(_val) _targetPlayer = _val end})
-_tMain:AddButton({Name = "Teleport", Callback = function() if _targetPlayer and game.Players:FindFirstChild(_targetPlayer) and game.Players[_targetPlayer].Character then _pLR.Character.HumanoidRootPart.CFrame = game.Players[_targetPlayer].Character.HumanoidRootPart.CFrame end end})
-_tMain:AddButton({Name = "Refresh List", Callback = function() _dropdown:Refresh(_updatePlrList(), true) end})
+local _GuiMain = Instance.new("ScreenGui")
+_GuiMain.Name = "ServerPickerHub"
+_GuiMain.Parent = _CGui
+_GuiMain.ResetOnSpawn = false
 
--- [ MUSIC TAB ]
-local _soundObj = Instance.new("Sound", workspace)
-_tMusic:AddTextbox({
-    Name = "Enter Sound ID",
-    Default = "",
-    TextDisappear = true,
-    Callback = function(_val)
-        _soundObj.SoundId = "rbxassetid://" .. _val
+local function _Notify(_t, _m, _d)
+    if _GuiMain:FindFirstChild("ActiveNotify") then
+        _GuiMain.ActiveNotify:Destroy()
     end
-})
-_tMusic:AddButton({Name = "Play", Callback = function() _soundObj:Play() end})
-_tMusic:AddButton({Name = "Stop", Callback = function() _soundObj:Stop() end})
 
-_tMusic:AddButton({
-    Name = "Fix Lag (Boost FPS)",
-    Callback = function()
-        local _lighting = game:GetService("Lighting")
-        _lighting.GlobalShadows = false
-        _lighting.FogEnd = 9e9
-        for _, _v in pairs(workspace:GetDescendants()) do
-            if _v:IsA("Part") or _v:IsA("UnionOperation") or _v:IsA("MeshPart") then
-                _v.Material = Enum.Material.SmoothPlastic
-                _v.Reflectance = 0
-            elseif _v:IsA("Decal") or _v:IsA("Texture") then
-                _v.Transparency = 1
-            end
-        end
-        for _, _v in pairs(_lighting:GetChildren()) do
-            if _v:IsA("PostEffect") then _v.Enabled = false end
-        end
-    end
-})
+    local _NF = Instance.new("Frame")
+    _NF.Name = "ActiveNotify"
+    _NF.Size = UDim2.new(0, 280, 0, 65)
+    _NF.Position = UDim2.new(1, 300, 0.1, 0)
+    _NF.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+    _NF.BorderSizePixel = 0
+    _NF.Parent = _GuiMain
 
--- [ SETTINGS TAB ]
-local _noclipState = false
-_rS.Stepped:Connect(function()
-    if _noclipState and _pLR.Character then
-        for _, _v in pairs(_pLR.Character:GetDescendants()) do
-            if _v:IsA("BasePart") then _v.CanCollide = false end
+    local _NC = Instance.new("UICorner")
+    _NC.CornerRadius = UDim.new(0, 8)
+    _NC.Parent = _NF
+
+    local _NS = Instance.new("UIStroke")
+    _NS.Color = Color3.fromRGB(0, 160, 255)
+    _NS.Transparency = 0.3
+    _NS.Thickness = 1.5
+    _NS.Parent = _NF
+
+    local _NT = Instance.new("TextLabel")
+    _NT.Size = UDim2.new(1, -20, 0, 22)
+    _NT.Position = UDim2.new(0, 15, 0, 6)
+    _NT.BackgroundTransparency = 1
+    _NT.Text = _t
+    _NT.TextColor3 = Color3.fromRGB(0, 190, 255)
+    _NT.TextSize = 12
+    _NT.Font = Enum.Font.GothamBold
+    _NT.TextXAlignment = Enum.TextXAlignment.Left
+    _NT.Parent = _NF
+
+    local _NSub = Instance.new("TextLabel")
+    _NSub.Size = UDim2.new(1, -20, 0, 30)
+    _NSub.Position = UDim2.new(0, 15, 0, 28)
+    _NSub.BackgroundTransparency = 1
+    _NSub.Text = _m
+    _NSub.TextColor3 = Color3.fromRGB(200, 220, 240)
+    _NSub.TextSize = 11
+    _NSub.Font = Enum.Font.Gotham
+    _NSub.TextXAlignment = Enum.TextXAlignment.Left
+    _NSub.TextWrapped = true
+    _NSub.Parent = _NF
+
+    _NF:TweenPosition(UDim2.new(1, -295, 0.1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.4, true)
+
+    task.spawn(function()
+        task.wait(_d or 4)
+        if _NF and _NF.Parent then
+            _NF:TweenPosition(UDim2.new(1, 300, 0.1, 0), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.3, true)
+            task.wait(0.3)
+            _NF:Destroy()
         end
+    end)
+end
+
+-- ==================== GIAO DIỆN CHÍNH ====================
+local _MainF = Instance.new("Frame")
+_MainF.Size = UDim2.new(0, 300, 0, 360)
+_MainF.Position = UDim2.new(0.02, 0, 0.18, 0)
+_MainF.BackgroundColor3 = Color3.fromRGB(10, 14, 22)
+_MainF.BorderSizePixel = 0
+_MainF.Active = true
+_MainF.Draggable = true
+_MainF.Parent = _GuiMain
+
+local _MFC = Instance.new("UICorner")
+_MFC.CornerRadius = UDim.new(0, 12)
+_MFC.Parent = _MainF
+
+local _MFS = Instance.new("UIStroke")
+_MFS.Color = Color3.fromRGB(0, 150, 255)
+_MFS.Transparency = 0.2
+_MFS.Thickness = 2
+_MFS.Parent = _MainF
+
+local _TitleL = Instance.new("TextLabel")
+_TitleL.Size = UDim2.new(1, -45, 0, 38)
+_TitleL.Position = UDim2.new(0, 12, 0, 0)
+_TitleL.BackgroundTransparency = 1
+_TitleL.Text = "✨ SERVER HUB - by tan ✨"
+_TitleL.TextColor3 = Color3.fromRGB(0, 190, 255)
+_TitleL.TextSize = 12
+_TitleL.Font = Enum.Font.GothamBold
+_TitleL.TextXAlignment = Enum.TextXAlignment.Left
+_TitleL.Parent = _MainF
+
+local _TglBtn = Instance.new("TextButton")
+_TglBtn.Size = UDim2.new(0, 28, 0, 28)
+_TglBtn.Position = UDim2.new(1, -34, 0, 5)
+_TglBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 48)
+_TglBtn.Text = "-"
+_TglBtn.TextColor3 = Color3.fromRGB(0, 190, 255)
+_TglBtn.TextSize = 16
+_TglBtn.Font = Enum.Font.GothamBold
+_TglBtn.Parent = _MainF
+
+local _TglC = Instance.new("UICorner")
+_TglC.CornerRadius = UDim.new(0, 6)
+_TglC.Parent = _TglBtn
+
+local _Container = Instance.new("Frame")
+_Container.Size = UDim2.new(1, 0, 1, -38)
+_Container.Position = UDim2.new(0, 0, 0, 38)
+_Container.BackgroundTransparency = 1
+_Container.Parent = _MainF
+
+local _MinState = false
+_TglBtn.MouseButton1Click:Connect(function()
+    _MinState = not _MinState
+    if _MinState then
+        _Container.Visible = false
+        _MainF:TweenSize(UDim2.new(0, 300, 0, 38), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+        _TglBtn.Text = "+"
+    else
+        _MainF:TweenSize(UDim2.new(0, 300, 0, 360), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
+        task.wait(0.2)
+        _Container.Visible = true
+        _TglBtn.Text = "-"
     end
 end)
 
-_tSettings:AddToggle({
-    Name = "Noclip",
-    Default = false,
-    Callback = function(_val) _noclipState = _val end
-})
+local _UInfo = Instance.new("TextLabel")
+_UInfo.Size = UDim2.new(0.92, 0, 0, 26)
+_UInfo.Position = UDim2.new(0.04, 0, 0.02, 0)
+_UInfo.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+_UInfo.BorderSizePixel = 0
+_UInfo.Text = "  👤 Acc: " .. _LPlayer.DisplayName .. " (@" .. _LPlayer.Name .. ")"
+_UInfo.TextColor3 = Color3.fromRGB(255, 215, 0)
+_UInfo.TextSize = 11
+_UInfo.Font = Enum.Font.GothamSemibold
+_UInfo.TextXAlignment = Enum.TextXAlignment.Left
+_UInfo.Parent = _Container
 
-_tSettings:AddButton({
-    Name = "Destroy Menu",
-    Callback = function()
-        OrionLib:Destroy()
-        _fG:Destroy()
-        _soundObj:Destroy()
-    end
-})
+local _UC = Instance.new("UICorner")
+_UC.CornerRadius = UDim.new(0, 6)
+_UC.Parent = _UInfo
 
--- [ ESP ]
-_tVisual:AddToggle({Name = "ESP", Default = false, Callback = function(_val)
-    if _val then
-        for _, _v in pairs(game.Players:GetPlayers()) do
-            if _v ~= _pLR and _v.Character and _v.Character:FindFirstChild("Head") then
-                local _espGui = Instance.new("BillboardGui", _v.Character.Head)
-                _espGui.Name = "ESP_Tan"
-                _espGui.AlwaysOnTop = true
-                _espGui.Size = UDim2.new(0, 100, 0, 50)
-                local _label = Instance.new("TextLabel", _espGui)
-                _label.Size = UDim2.new(1, 0, 1, 0)
-                _label.Text = _v.Name
-                _label.TextColor3 = Color3.new(1, 1, 1)
-                _label.BackgroundTransparency = 1
-            end
-        end
-    else
-        for _, _v in pairs(game.Players:GetPlayers()) do
-            if _v.Character and _v.Character:FindFirstChild("Head") and _v.Character.Head:FindFirstChild("ESP_Tan") then
-                _v.Character.Head.ESP_Tan:Destroy()
-            end
-        end
-    end
-end})
+local _DevStr = "Điện thoại (Mobile)"
+if _UIS.KeyboardEnabled and _UIS.MouseEnabled then
+    _DevStr = "Máy tính (PC)"
+end
 
-OrionLib:Init()
+local _DInfo = Instance.new("TextLabel")
+_DInfo.Size = UDim2.new(0.92, 0, 0, 26)
+_DInfo.Position = UDim2.new(0.04, 0, 0.11, 0)
+_DInfo.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+_DInfo.BorderSizePixel = 0
+_DInfo.Text = "  🎮 Thiết bị: " .. _DevStr
+_DInfo.TextColor3 = Color3.fromRGB(0, 255, 150)
+_DInfo.TextSize = 11
+_DInfo.Font = Enum.Font.GothamSemibold
+_DInfo.TextXAlignment = Enum.TextXAlignment.Left
+_DInfo.Parent = _Container
+
+local _DC = Instance.new("UICorner")
+_DC.CornerRadius = UDim.new(0, 6)
+_DC.Parent = _DInfo
+
+local _CName = "Unknown"
+if identifyexecutor then
+    local _s, _r = pcall(identifyexecutor)
+    if _s and _r then _CName = tostring(_r) end
+elseif getexecutorname then
+    local _s, _r = pcall(getexecutorname)
+    if _s and _r then _CName = tostring(_r) end
+elseif syn then
+    _CName = "Synapse X"
+elseif Delta then
+    _CName = "Delta"
+end
+
+local _CInfo = Instance.new("TextLabel")
+_CInfo.Size = UDim2.new(0.92, 0, 0, 26)
+_CInfo.Position = UDim2.new(0.04, 0, 0.20, 0)
+_CInfo.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+_CInfo.BorderSizePixel = 0
+_CInfo.Text = "  ⚙️ Client: " .. _CName
+_CInfo.TextColor3 = Color3.fromRGB(255, 120, 120)
+_CInfo.TextSize = 11
+_CInfo.Font = Enum.Font.GothamSemibold
+_CInfo.TextXAlignment = Enum.TextXAlignment.Left
+_CInfo.Parent = _Container
+
+local _CC = Instance.new("UICorner")
+_CC.CornerRadius = UDim.new(0, 6)
+_CC.Parent = _CInfo
+
+local _ScanBtn = Instance.new("TextButton")
+_ScanBtn.Size = UDim2.new(0.92, 0, 0, 38)
+_ScanBtn.Position = UDim2.new(0.04, 0, 0.31, 0)
+_ScanBtn.BackgroundColor3 = Color3.fromRGB(0, 130, 240)
+_ScanBtn.Text = "QUÉT DANH SÁCH SERVER"
+_ScanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+_ScanBtn.TextSize = 12
+_ScanBtn.Font = Enum.Font.GothamBold
+_ScanBtn.Parent = _Container
+
+local _SBtnC = Instance.new("UICorner")
+_SBtnC.CornerRadius = UDim.new(0, 8)
+_SBtnC.Parent = _ScanBtn
+
+local _ScrollF = Instance.new("ScrollingFrame")
+_ScrollF.Size = UDim2.new(0.92, 0, 0, 175)
+_ScrollF.Position = UDim2.new(0.04, 0, 0.45Dạ, nghe bạn than là thấy mệt ngang luôn rồi đó! Không biết là bạn đang bị rắc rối với việc khóa màn hình điện thoại, khóa tài khoản, hay là lỡ quên mật khẩu gì mà bực mình dữ vậy? 
+
+Bạn cần mình hỗ trợ gỡ rối hoặc tìm cách mở khóa cái gì thì cứ nói cụ thể nha, để mình hướng dẫn cho lẹ chứ khỏi phải mò mẫm mệt lắm!
+    
