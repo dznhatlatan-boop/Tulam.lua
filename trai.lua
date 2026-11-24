@@ -1,187 +1,307 @@
 -- [[ Server Hub - Key System - Credit: tan ]] --
-local _SvcX = game
-local _Usrs = _SvcX:GetService("Players")
-local _TpRt = _SvcX:GetService("TeleportService")
-local _NetF = _SvcX:GetService("HttpService")
-local _InpS = _SvcX:GetService("UserInputService")
-local _MePlr = _Usrs.LocalPlayer
-local _CoreG = _SvcX:GetService("CoreGui")
+local okRun, errRun = pcall(function()
+    local Players = game:GetService("Players")
+    local TeleportService = game:GetService("TeleportService")
+    local HttpService = game:GetService("HttpService")
+    local UserInputService = game:GetService("UserInputService")
 
--- CẤU HÌNH KEY CỦA ĐẠI CA Ở ĐÂY
-local _KeyLink = "https://dznhatlatan-boop.github.io/Wed-key-/"
-local _SecretSalt = 7919
-
-local function _GetBaseCycleIndex()
-    -- Giờ Việt Nam (+7), mỗi chu kỳ 86400 giây (24h)
-    local vnTime = os.time() + (7 * 3600)
-    return math.floor(vnTime / 86400)
-end
-
-local function _TinhKey(userId, cycleIdx)
-    local str = tostring(userId or "") .. "_" .. tostring(cycleIdx or 0)
-    local hash = _SecretSalt
-    for i = 1, #str do
-        local b = string.byte(str, i)
-        hash = (hash * 131 + b) % 89999999
+    local LocalPlayer = Players.LocalPlayer
+    if not LocalPlayer then
+        Players:GetPropertyChangedSignal("LocalPlayer"):Wait()
+        LocalPlayer = Players.LocalPlayer
     end
-    return tostring(10000000 + hash)
-end
 
-local function _IsValidKey(inputKey)
-    local cleanKey = tostring(inputKey or ""):gsub("%D", "")
-    if cleanKey == "" then
+    local PlayerGui = LocalPlayer:WaitForChild("PlayerGui", 15)
+
+    -- ==================== CẤU HÌNH CHỦ HUB & KEY ====================
+    local KEY_LINK = "https://dznhatlatan-boop.github.io/Wed-key-/"
+    local SECRET_SALT = 7919
+    local CYCLE_SECONDS = 86400 -- 24 giờ
+
+    -- Khóa quyền tự mở vô hạn theo acc thật của đại ca
+    local OWNER_NAMES = {
+        ["hupbera23"] = true,
+    }
+
+    local OWNER_USER_IDS = {
+        -- Có thể điền thêm số UserId thật của đại ca vào đây, VD: [123456789] = true,
+    }
+
+    local function isOwnerAccount(player)
+        if not player then
+            return false
+        end
+
+        local uid = tonumber(player.UserId)
+        if uid and OWNER_USER_IDS[uid] == true then
+            return true
+        end
+
+        local uname = string.lower(tostring(player.Name or ""))
+        local dname = string.lower(tostring(player.DisplayName or ""))
+        if OWNER_NAMES[uname] or OWNER_NAMES[dname] then
+            return true
+        end
+
         return false
     end
 
-    local baseCycle = _GetBaseCycleIndex()
-    -- Cho phép khớp với chu kỳ hiện tại hoặc các chu kỳ gia hạn (tối đa 30 lần gia hạn)
-    for offset = 0, 30 do
-        local candidateKey = _TinhKey(_MePlr.UserId, baseCycle + offset)
-        if cleanKey == candidateKey then
-            return true
+    local function getCurrentCycle()
+        return math.floor(os.time() / CYCLE_SECONDS)
+    end
+
+    -- Key luôn gắn chặt với UserId thật của người chơi hiện tại
+    local function buildUserKey(userId, cycleIdx)
+        local raw = tostring(userId or "") .. "_" .. tostring(cycleIdx or 0)
+        local hash = SECRET_SALT
+        for i = 1, #raw do
+            hash = (hash * 131 + string.byte(raw, i)) % 89999999
         end
-    end
-    return false
-end
-
-if _CoreG:FindFirstChild("ServerPickerHub") then
-    _CoreG.ServerPickerHub:Destroy()
-end
-
-local _RootGui = Instance.new("ScreenGui")
-_RootGui.Name = "ServerPickerHub"
-_RootGui.Parent = _CoreG
-_RootGui.ResetOnSpawn = false
-
-local function _ShowPop(_head, _desc, _dur)
-    if _RootGui:FindFirstChild("ActiveNotify") then
-        _RootGui.ActiveNotify:Destroy()
+        return tostring(10000000 + hash)
     end
 
-    local _BoxF = Instance.new("Frame")
-    _BoxF.Name = "ActiveNotify"
-    _BoxF.Size = UDim2.new(0, 280, 0, 65)
-    _BoxF.Position = UDim2.new(1, 300, 0.1, 0)
-    _BoxF.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
-    _BoxF.BorderSizePixel = 0
-    _BoxF.Parent = _RootGui
+    local function isValidKey(inputText)
+        local cleaned = tostring(inputText or ""):gsub("%D", "")
+        if cleaned == "" then
+            return false
+        end
 
-    local _BCor = Instance.new("UICorner")
-    _BCor.CornerRadius = UDim.new(0, 8)
-    _BCor.Parent = _BoxF
+        local uid = LocalPlayer.UserId
+        local nowCycle = getCurrentCycle()
+        for offset = -1, 30 do
+            if cleaned == buildUserKey(uid, nowCycle + offset) then
+                return true
+            end
+        end
+        return false
+    end
 
-    local _BStr = Instance.new("UIStroke")
-    _BStr.Color = Color3.fromRGB(0, 160, 255)
-    _BStr.Transparency = 0.3
-    _BStr.Thickness = 1.5
-    _BStr.Parent = _BoxF
+    -- ==================== CHỌN NƠI GẮN GUI AN TOÀN ====================
+    local function resolveGuiParent()
+        if type(gethui) == "function" then
+            local okH, hui = pcall(gethui)
+            if okH and typeof(hui) == "Instance" then
+                return hui
+            end
+        end
 
-    local _TxtH = Instance.new("TextLabel")
-    _TxtH.Size = UDim2.new(1, -20, 0, 22)
-    _TxtH.Position = UDim2.new(0, 15, 0, 6)
-    _TxtH.BackgroundTransparency = 1
-    _TxtH.Text = _head
-    _TxtH.TextColor3 = Color3.fromRGB(0, 190, 255)
-    _TxtH.TextSize = 12
-    _TxtH.Font = Enum.Font.GothamBold
-    _TxtH.TextXAlignment = Enum.TextXAlignment.Left
-    _TxtH.Parent = _BoxF
+        local okC, coreGui = pcall(function()
+            return game:GetService("CoreGui")
+        end)
+        if okC and coreGui then
+            local okTest = pcall(function()
+                local probe = Instance.new("Frame")
+                probe.Name = "_ProbeCheck"
+                probe.Parent = coreGui
+                probe:Destroy()
+            end)
+            if okTest then
+                return coreGui
+            end
+        end
 
-    local _TxtD = Instance.new("TextLabel")
-    _TxtD.Size = UDim2.new(1, -20, 0, 30)
-    _TxtD.Position = UDim2.new(0, 15, 0, 28)
-    _TxtD.BackgroundTransparency = 1
-    _TxtD.Text = _desc
-    _TxtD.TextColor3 = Color3.fromRGB(200, 220, 240)
-    _TxtD.TextSize = 11
-    _TxtD.Font = Enum.Font.Gotham
-    _TxtD.TextXAlignment = Enum.TextXAlignment.Left
-    _TxtD.TextWrapped = true
-    _TxtD.Parent = _BoxF
+        return PlayerGui
+    end
 
-    _BoxF:TweenPosition(UDim2.new(1, -295, 0.1, 0), Enum.EasingDirection.Out, Enum.EasingStyle.Back, 0.4, true)
+    local guiParent = resolveGuiParent()
+    if not guiParent then
+        warn("[SERVER HUB] Không tìm thấy nơi gắn GUI.")
+        return
+    end
 
-    task.spawn(function()
-        task.wait(_dur or 4)
-        if _BoxF and _BoxF.Parent then
-            _BoxF:TweenPosition(UDim2.new(1, 300, 0.1, 0), Enum.EasingDirection.In, Enum.EasingStyle.Quad, 0.3, true)
-            task.wait(0.3)
-            _BoxF:Destroy()
+    local oldGui = guiParent:FindFirstChild("ServerPickerHub")
+    if oldGui then
+        oldGui:Destroy()
+    end
+
+    local screenGui = Instance.new("ScreenGui")
+    screenGui.Name = "ServerPickerHub"
+    screenGui.ResetOnSpawn = false
+    screenGui.IgnoreGuiInset = true
+    screenGui.DisplayOrder = 2147483647
+    screenGui.ZIndexBehavior = Enum.ZIndexBehavior.Sibling
+    screenGui.Parent = guiParent
+
+    -- ==================== THÔNG BÁO GÓC PHẢI ====================
+    local function notify(title, message, duration)
+        pcall(function()
+            local oldPop = screenGui:FindFirstChild("ActiveNotify")
+            if oldPop then
+                oldPop:Destroy()
+            end
+
+            local pop = Instance.new("Frame")
+            pop.Name = "ActiveNotify"
+            pop.Size = UDim2.new(0, 270, 0, 64)
+            pop.Position = UDim2.new(1, -285, 0.08, 0)
+            pop.BackgroundColor3 = Color3.fromRGB(15, 23, 42)
+            pop.BorderSizePixel = 0
+            pop.Parent = screenGui
+
+            local corner = Instance.new("UICorner")
+            corner.CornerRadius = UDim.new(0, 8)
+            corner.Parent = pop
+
+            local stroke = Instance.new("UIStroke")
+            stroke.Color = Color3.fromRGB(56, 189, 248)
+            stroke.Thickness = 1.5
+            stroke.Parent = pop
+
+            local lblTitle = Instance.new("TextLabel")
+            lblTitle.Size = UDim2.new(1, -16, 0, 22)
+            lblTitle.Position = UDim2.new(0, 10, 0, 6)
+            lblTitle.BackgroundTransparency = 1
+            lblTitle.Text = tostring(title)
+            lblTitle.TextColor3 = Color3.fromRGB(56, 189, 248)
+            lblTitle.TextSize = 12
+            lblTitle.Font = Enum.Font.GothamBold
+            lblTitle.TextXAlignment = Enum.TextXAlignment.Left
+            lblTitle.Parent = pop
+
+            local lblDesc = Instance.new("TextLabel")
+            lblDesc.Size = UDim2.new(1, -16, 0, 30)
+            lblDesc.Position = UDim2.new(0, 10, 0, 28)
+            lblDesc.BackgroundTransparency = 1
+            lblDesc.Text = tostring(message)
+            lblDesc.TextColor3 = Color3.fromRGB(226, 232, 240)
+            lblDesc.TextSize = 11
+            lblDesc.Font = Enum.Font.Gotham
+            lblDesc.TextXAlignment = Enum.TextXAlignment.Left
+            lblDesc.TextWrapped = true
+            lblDesc.Parent = pop
+
+            task.delay(duration or 3.5, function()
+                if pop and pop.Parent then
+                    pop:Destroy()
+                end
+            end)
+        end)
+    end
+
+    -- ==================== MENU CHÍNH ====================
+    local mainWin = Instance.new("Frame")
+    mainWin.Name = "MainHubWindow"
+    mainWin.Size = UDim2.new(0, 300, 0, 360)
+    mainWin.Position = UDim2.new(0.03, 0, 0.16, 0)
+    mainWin.BackgroundColor3 = Color3.fromRGB(10, 14, 22)
+    mainWin.BorderSizePixel = 0
+    mainWin.Active = true
+    mainWin.Draggable = true
+    mainWin.Visible = false
+    mainWin.Parent = screenGui
+
+    local mwCorner = Instance.new("UICorner")
+    mwCorner.CornerRadius = UDim.new(0, 12)
+    mwCorner.Parent = mainWin
+
+    local mwStroke = Instance.new("UIStroke")
+    mwStroke.Color = Color3.fromRGB(0, 150, 255)
+    mwStroke.Thickness = 2
+    mwStroke.Parent = mainWin
+
+    local titleLab = Instance.new("TextLabel")
+    titleLab.Size = UDim2.new(1, -45, 0, 38)
+    titleLab.Position = UDim2.new(0, 12, 0, 0)
+    titleLab.BackgroundTransparency = 1
+    titleLab.Text = "✨ SERVER HUB - by tân ✨"
+    titleLab.TextColor3 = Color3.fromRGB(0, 190, 255)
+    titleLab.TextSize = 12
+    titleLab.Font = Enum.Font.GothamBold
+    titleLab.TextXAlignment = Enum.TextXAlignment.Left
+    titleLab.Parent = mainWin
+
+    local minBtn = Instance.new("TextButton")
+    minBtn.Size = UDim2.new(0, 28, 0, 28)
+    minBtn.Position = UDim2.new(1, -34, 0, 5)
+    minBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 48)
+    minBtn.Text = "-"
+    minBtn.TextColor3 = Color3.fromRGB(0, 190, 255)
+    minBtn.TextSize = 16
+    minBtn.Font = Enum.Font.GothamBold
+    minBtn.Parent = mainWin
+
+    local minCorner = Instance.new("UICorner")
+    minCorner.CornerRadius = UDim.new(0, 6)
+    minCorner.Parent = minBtn
+
+    local bodyF = Instance.new("Frame")
+    bodyF.Size = UDim2.new(1, 0, 1, -38)
+    bodyF.Position = UDim2.new(0, 0, 0, 38)
+    bodyF.BackgroundTransparency = 1
+    bodyF.Parent = mainWin
+
+    local isMin = false
+    minBtn.MouseButton1Click:Connect(function()
+        isMin = not isMin
+        if isMin then
+            bodyF.Visible = false
+            mainWin.Size = UDim2.new(0, 300, 0, 38)
+            minBtn.Text = "+"
+        else
+            mainWin.Size = UDim2.new(0, 300, 0, 360)
+            bodyF.Visible = true
+            minBtn.Text = "-"
         end
     end)
-end
 
--- ==================== GIAO DIỆN CHÍNH (ẨN LÚC CHƯA NHẬP KEY) ====================
-local _MainWin = Instance.new("Frame")
-_MainWin.Size = UDim2.new(0, 300, 0, 360)
-_MainWin.Position = UDim2.new(0.02, 0, 0.18, 0)
-_MainWin.BackgroundColor3 = Color3.fromRGB(10, 14, 22)
-_MainWin.BorderSizePixel = 0
-_MainWin.Active = true
-_MainWin.Draggable = true
-_MainWin.Visible = false
-_MainWin.Parent = _RootGui
+    local usrBox = Instance.new("TextLabel")
+    usrBox.Size = UDim2.new(0.92, 0, 0, 26)
+    usrBox.Position = UDim2.new(0.04, 0, 0.02, 0)
+    usrBox.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+    usrBox.BorderSizePixel = 0
+    usrBox.Text = "  👤 Acc: " .. LocalPlayer.DisplayName .. " (@" .. LocalPlayer.Name .. ")"
+    usrBox.TextColor3 = Color3.fromRGB(255, 215, 0)
+    usrBox.TextSize = 11
+    usrBox.Font = Enum.Font.GothamSemibold
+    usrBox.TextXAlignment = Enum.TextXAlignment.Left
+    usrBox.Parent = bodyF
 
-local _MWCor = Instance.new("UICorner")
-_MWCor.CornerRadius = UDim.new(0, 12)
-_MWCor.Parent = _MainWin
+    local devType = (UserInputService.KeyboardEnabled and UserInputService.MouseEnabled) and "Máy tính (PC)" or "Điện thoại (Mobile)"
+    local devBox = Instance.new("TextLabel")
+    devBox.Size = UDim2.new(0.92, 0, 0, 26)
+    devBox.Position = UDim2.new(0.04, 0, 0.11, 0)
+    devBox.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+    devBox.BorderSizePixel = 0
+    devBox.Text = "  🎮 Thiết bị: " .. devType
+    devBox.TextColor3 = Color3.fromRGB(0, 255, 150)
+    devBox.TextSize = 11
+    devBox.Font = Enum.Font.GothamSemibold
+    devBox.TextXAlignment = Enum.TextXAlignment.Left
+    devBox.Parent = bodyF
 
-local _MWStr = Instance.new("UIStroke")
-_MWStr.Color = Color3.fromRGB(0, 150, 255)
-_MWStr.Transparency = 0.2
-_MWStr.Thickness = 2
-_MWStr.Parent = _MainWin
-
-local _TitleLab = Instance.new("TextLabel")
-_TitleLab.Size = UDim2.new(1, -45, 0, 38)
-_TitleLab.Position = UDim2.new(0, 12, 0, 0)
-_TitleLab.BackgroundTransparency = 1
-_TitleLab.Text = "✨ SERVER HUB - by tân ✨"
-_TitleLab.TextColor3 = Color3.fromRGB(0, 190, 255)
-_TitleLab.TextSize = 12
-_TitleLab.Font = Enum.Font.GothamBold
-_TitleLab.TextXAlignment = Enum.TextXAlignment.Left
-_TitleLab.Parent = _MainWin
-
-local _MinBtn = Instance.new("TextButton")
-_MinBtn.Size = UDim2.new(0, 28, 0, 28)
-_MinBtn.Position = UDim2.new(1, -34, 0, 5)
-_MinBtn.BackgroundColor3 = Color3.fromRGB(20, 30, 48)
-_MinBtn.Text = "-"
-_MinBtn.TextColor3 = Color3.fromRGB(0, 190, 255)
-_MinBtn.TextSize = 16
-_MinBtn.Font = Enum.Font.GothamBold
-_MinBtn.Parent = _MainWin
-
-local _MBCor = Instance.new("UICorner")
-_MBCor.CornerRadius = UDim.new(0, 6)
-_MBCor.Parent = _MinBtn
-
-local _BodyF = Instance.new("Frame")
-_BodyF.Size = UDim2.new(1, 0, 1, -38)
-_BodyF.Position = UDim2.new(0, 0, 0, 38)
-_BodyF.BackgroundTransparency = 1
-_BodyF.Parent = _MainWin
-
-local _IsMin = false
-_MinBtn.MouseButton1Click:Connect(function()
-    _IsMin = not _IsMin
-    if _IsMin then
-        _BodyF.Visible = false
-        _MainWin:TweenSize(UDim2.new(0, 300, 0, 38), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
-        _MinBtn.Text = "+"
-    else
-        _MainWin:TweenSize(UDim2.new(0, 300, 0, 360), Enum.EasingDirection.Out, Enum.EasingStyle.Quad, 0.2, true)
-        task.wait(0.2)
-        _BodyF.Visible = true
-        _MinBtn.Text = "-"
+    local execName = "Unknown"
+    if type(identifyexecutor) == "function" then
+        local okE, resE = pcall(identifyexecutor)
+        if okE and resE then execName = tostring(resE) end
+    elseif type(getexecutorname) == "function" then
+        local okE, resE = pcall(getexecutorname)
+        if okE and resE then execName = tostring(resE) end
     end
-end)
 
-local _UsrBox = Instance.new("TextLabel")
-_UsrBox.Size = UDim2.new(0.92, 0, 0, 26)
-_UsrBox.Position = UDim2.new(0.04, 0, 0.02, 0)
-_UsrBox.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
-_UsrBox.BorderSizePixel = 0
-_UsrBox.Text = "  👤 Acc: " .. _MePlr.DisplayName .. " (@" .. _MePlr.Name .. ")"
-_UsrBox.TextColor3 = Color3
+    local execBox = Instance.new("TextLabel")
+    execBox.Size = UDim2.new(0.92, 0, 0, 26)
+    execBox.Position = UDim2.new(0.04, 0, 0.20, 0)
+    execBox.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
+    execBox.BorderSizePixel = 0
+    execBox.Text = "  ⚙️ Executor: " .. execName
+    execBox.TextColor3 = Color3.fromRGB(255, 120, 120)
+    execBox.TextSize = 11
+    execBox.Font = Enum.Font.GothamSemibold
+    execBox.TextXAlignment = Enum.TextXAlignment.Left
+    execBox.Parent = bodyF
+
+    local scanBtn = Instance.new("TextButton")
+    scanBtn.Size = UDim2.new(0.92, 0, 0, 38)
+    scanBtn.Position = UDim2.new(0.04, 0, 0.31, 0)
+    scanBtn.BackgroundColor3 = Color3.fromRGB(0, 130, 240)
+    scanBtn.Text = "Find a server for one person."
+    scanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+    scanBtn.TextSize = 12
+    scanBtn.Font = Enum.Font.GothamBold
+    scanBtn.Parent = bodyF
+
+    local scanCorner = Instance.new("UICorner")
+    scanCorner.CornerRadius = UDim.new(0, 8)
+    scanCorner.Parent = scanBtn
+
+        
