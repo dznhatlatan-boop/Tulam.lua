@@ -1,9 +1,7 @@
--- [[ AK HUB - trai.lua | Clean Text | Owner Gold (OWNER VN) / User Blue ]] --
 local Players = game:GetService("Players")
 local TeleportService = game:GetService("TeleportService")
 local HttpService = game:GetService("HttpService")
 local UserInputService = game:GetService("UserInputService")
-local StarterGui = game:GetService("StarterGui")
 
 local KEY_LINK = "https://dznhatlatan-boop.github.io/Wed-key-/"
 local _SecretSalt = 7919
@@ -18,22 +16,10 @@ local OWNER_USER_IDS = {
     -- Thêm UserId thật của chủ hub nếu cần, VD: [123456789] = true,
 }
 
-local function waitPlayer()
-    local lp = Players.LocalPlayer
-    for _ = 1, 100 do
-        if lp then break end
-        task.wait(0.1)
-        lp = Players.LocalPlayer
-    end
-    return lp
-end
-
-local LocalPlayer = waitPlayer()
+local lp = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local function isOwnerAccount(player)
-    if not player then
-        return false
-    end
+    if not player then return false end
     local uid = tonumber(player.UserId)
     if uid and OWNER_USER_IDS[uid] == true then
         return true
@@ -60,14 +46,10 @@ local function buildUserKey(userId, cycleIdx)
 end
 
 local function isValidKey(inputText)
-    if not LocalPlayer then
-        return false
-    end
+    if not lp then return false end
     local cleaned = tostring(inputText or ""):gsub("%D", "")
-    if cleaned == "" then
-        return false
-    end
-    local uid = LocalPlayer.UserId
+    if cleaned == "" then return false end
+    local uid = lp.UserId
     local nowCycle = getCurrentCycle()
     for offset = -1, 30 do
         if cleaned == buildUserKey(uid, nowCycle + offset) then
@@ -77,92 +59,118 @@ local function isValidKey(inputText)
     return false
 end
 
-local function getTargets()
-    local list = {}
-    if LocalPlayer then
-        local pg = LocalPlayer:FindFirstChildOfClass("PlayerGui") or LocalPlayer:WaitForChild("PlayerGui", 5)
-        if pg then
-            table.insert(list, pg)
-        end
-    end
+local function clearAllOldGuis()
+    local targets = {}
+    local pg = lp:FindFirstChildOfClass("PlayerGui")
+    if pg then table.insert(targets, pg) end
     pcall(function()
         local cg = game:GetService("CoreGui")
-        if cg then
-            table.insert(list, cg)
-        end
+        if cg then table.insert(targets, cg) end
     end)
-    if StarterGui then
-        table.insert(list, StarterGui)
+
+    for _, container in ipairs(targets) do
+        for _, child in ipairs(container:GetChildren()) do
+            if child:IsA("ScreenGui") then
+                local n = child.Name
+                if n == "AKHubColorGui"
+                    or n == "AKHubSingleGui"
+                    or n == "AKHubCleanGui"
+                    or n == "ServerHubTemplate"
+                    or string.find(n, "TraiHubGui_", 1, true)
+                    or string.find(n, "ServerPickerHub_", 1, true)
+                    or string.find(n, "AKHub", 1, true)
+                then
+                    child:Destroy()
+                end
+            end
+        end
     end
-    return list
 end
 
-local targets = getTargets()
-local isOwner = isOwnerAccount(LocalPlayer)
+local function getGuiParent()
+    local pg = lp:FindFirstChildOfClass("PlayerGui") or lp:WaitForChild("PlayerGui", 10)
+    if pg then return pg end
+    local ok, cg = pcall(function()
+        return game:GetService("CoreGui")
+    end)
+    if ok and cg then return cg end
+    return nil
+end
+
+_G.AKHubSessionId = (_G.AKHubSessionId or 0) + 1
+local mySession = _G.AKHubSessionId
+
+clearAllOldGuis()
+task.wait(0.05)
+if _G.AKHubSessionId ~= mySession then
+    return
+end
+
+local parentGui = getGuiParent()
+if not parentGui then return end
+
+local isOwner = isOwnerAccount(lp)
 
 local THEME = isOwner and {
-    windowBg = Color3.fromRGB(26, 20, 8),
-    stroke = Color3.fromRGB(255, 200, 0),
-    titleText = Color3.fromRGB(255, 215, 0),
-    btnBg = Color3.fromRGB(217, 155, 0),
-    btnText = Color3.fromRGB(20, 15, 5),
-    cardBg = Color3.fromRGB(38, 30, 12),
-    minBtnBg = Color3.fromRGB(48, 38, 14),
-    badgeText = Color3.fromRGB(255, 225, 70),
+    windowBg = Color3.fromRGB(34, 22, 6),
+    stroke = Color3.fromRGB(255, 205, 0),
+    titleText = Color3.fromRGB(255, 225, 50),
+    btnBg = Color3.fromRGB(255, 165, 0),
+    btnText = Color3.fromRGB(25, 14, 2),
+    cardBg = Color3.fromRGB(54, 36, 10),
+    minBtnBg = Color3.fromRGB(70, 46, 12),
+    badgeText = Color3.fromRGB(255, 235, 110),
 } or {
-    windowBg = Color3.fromRGB(10, 14, 22),
-    stroke = Color3.fromRGB(0, 150, 255),
-    titleText = Color3.fromRGB(0, 190, 255),
-    btnBg = Color3.fromRGB(0, 130, 240),
+    windowBg = Color3.fromRGB(10, 18, 34),
+    stroke = Color3.fromRGB(0, 200, 255),
+    titleText = Color3.fromRGB(56, 225, 255),
+    btnBg = Color3.fromRGB(0, 150, 255),
     btnText = Color3.fromRGB(255, 255, 255),
-    cardBg = Color3.fromRGB(16, 22, 35),
-    minBtnBg = Color3.fromRGB(20, 30, 48),
-    badgeText = Color3.fromRGB(120, 205, 255),
+    cardBg = Color3.fromRGB(18, 32, 56),
+    minBtnBg = Color3.fromRGB(24, 42, 72),
+    badgeText = Color3.fromRGB(125, 225, 255),
 }
 
-local templateGui = Instance.new("ScreenGui")
-templateGui.Name = "ServerHubTemplate"
-templateGui.ResetOnSpawn = false
-templateGui.IgnoreGuiInset = true
-templateGui.DisplayOrder = 999999
+local gui = Instance.new("ScreenGui")
+gui.Name = "AKHubColorGui"
+gui.ResetOnSpawn = false
+gui.IgnoreGuiInset = true
+gui.DisplayOrder = 999999
+gui.Parent = parentGui
 
--- ==================== MENU CHÍNH ====================
 local mainWin = Instance.new("Frame")
-mainWin.Name = "MainHubWindow"
-mainWin.Size = UDim2.new(0, 300, 0, 350)
+mainWin.Size = UDim2.new(0, 305, 0, 355)
 mainWin.Position = UDim2.new(0.05, 0, 0.16, 0)
 mainWin.BackgroundColor3 = THEME.windowBg
 mainWin.BorderSizePixel = 0
 mainWin.Active = true
 mainWin.Draggable = true
 mainWin.Visible = isOwner
-mainWin.Parent = templateGui
+mainWin.Parent = gui
 
 local mwCorner = Instance.new("UICorner")
-mwCorner.CornerRadius = UDim.new(0, 12)
+mwCorner.CornerRadius = UDim.new(0, 14)
 mwCorner.Parent = mainWin
 
 local mwStroke = Instance.new("UIStroke")
 mwStroke.Color = THEME.stroke
-mwStroke.Thickness = 2
+mwStroke.Thickness = 2.5
 mwStroke.Parent = mainWin
 
 local titleLab = Instance.new("TextLabel")
-titleLab.Name = "TitleLabel"
-titleLab.Size = UDim2.new(1, -45, 0, 38)
+titleLab.Size = UDim2.new(1, -45, 0, 40)
 titleLab.Position = UDim2.new(0, 12, 0, 0)
 titleLab.BackgroundTransparency = 1
-titleLab.Text = isOwner and "AK HUB [OWNER VN] - by tan" or "AK HUB - by tan"
+titleLab.Text = isOwner and "👑 AK HUB [OWNER VN] 🔥" or "⚡ AK HUB VIP ✨"
 titleLab.TextColor3 = THEME.titleText
-titleLab.TextSize = 12
-titleLab.Font = Enum.Font.GothamBold
+titleLab.TextSize = 13
+titleLab.Font = Enum.Font.GothamBlack
 titleLab.TextXAlignment = Enum.TextXAlignment.Left
 titleLab.Parent = mainWin
 
 local minBtn = Instance.new("TextButton")
-minBtn.Name = "MinButton"
 minBtn.Size = UDim2.new(0, 28, 0, 28)
-minBtn.Position = UDim2.new(1, -34, 0, 5)
+minBtn.Position = UDim2.new(1, -35, 0, 6)
 minBtn.BackgroundColor3 = THEME.minBtnBg
 minBtn.Text = "-"
 minBtn.TextColor3 = THEME.titleText
@@ -170,270 +178,269 @@ minBtn.TextSize = 16
 minBtn.Font = Enum.Font.GothamBold
 minBtn.Parent = mainWin
 
+local minCorner = Instance.new("UICorner")
+minCorner.CornerRadius = UDim.new(0, 8)
+minCorner.Parent = minBtn
+
 local bodyF = Instance.new("Frame")
-bodyF.Name = "BodyFrame"
-bodyF.Size = UDim2.new(1, 0, 1, -38)
-bodyF.Position = UDim2.new(0, 0, 0, 38)
+bodyF.Size = UDim2.new(1, 0, 1, -40)
+bodyF.Position = UDim2.new(0, 0, 0, 40)
 bodyF.BackgroundTransparency = 1
 bodyF.Parent = mainWin
 
-local accName = LocalPlayer and (LocalPlayer.DisplayName .. " (@" .. LocalPlayer.Name .. ")") or "Unknown"
+local accName = lp.DisplayName .. " (@" .. lp.Name .. ")"
 local usrBox = Instance.new("TextLabel")
-usrBox.Name = "UserBox"
-usrBox.Size = UDim2.new(0.92, 0, 0, 26)
+usrBox.Size = UDim2.new(0.92, 0, 0, 28)
 usrBox.Position = UDim2.new(0.04, 0, 0.02, 0)
 usrBox.BackgroundColor3 = THEME.cardBg
 usrBox.BorderSizePixel = 0
-usrBox.Text = isOwner and ("  OWNER VN: " .. accName) or ("  Acc: " .. accName)
+usrBox.Text = isOwner and ("  👑 OWNER VN: " .. accName) or ("  👤 Acc: " .. accName)
 usrBox.TextColor3 = THEME.badgeText
 usrBox.TextSize = 11
-usrBox.Font = Enum.Font.GothamSemibold
+usrBox.Font = Enum.Font.GothamBold
 usrBox.TextXAlignment = Enum.TextXAlignment.Left
 usrBox.Parent = bodyF
 
-local devType = (UserInputService.KeyboardEnabled and UserInputService.MouseEnabled) and "PC" or "Mobile"
+local usrCorner = Instance.new("UICorner")
+usrCorner.CornerRadius = UDim.new(0, 8)
+usrCorner.Parent = usrBox
+
+local devType = (UserInputService.KeyboardEnabled and UserInputService.MouseEnabled) and "PC 💻" or "Mobile 📱"
 local devBox = Instance.new("TextLabel")
-devBox.Name = "DeviceBox"
-devBox.Size = UDim2.new(0.92, 0, 0, 26)
-devBox.Position = UDim2.new(0.04, 0, 0.11, 0)
+devBox.Size = UDim2.new(0.92, 0, 0, 28)
+devBox.Position = UDim2.new(0.04, 0, 0.12, 0)
 devBox.BackgroundColor3 = THEME.cardBg
 devBox.BorderSizePixel = 0
-devBox.Text = "  Device: " .. devType
-devBox.TextColor3 = isOwner and Color3.fromRGB(255, 220, 90) or Color3.fromRGB(0, 255, 150)
+devBox.Text = "  🎮 Device: " .. devType
+devBox.TextColor3 = isOwner and Color3.fromRGB(255, 215, 70) or Color3.fromRGB(45, 255, 165)
 devBox.TextSize = 11
-devBox.Font = Enum.Font.GothamSemibold
+devBox.Font = Enum.Font.GothamBold
 devBox.TextXAlignment = Enum.TextXAlignment.Left
 devBox.Parent = bodyF
 
+local devCorner = Instance.new("UICorner")
+devCorner.CornerRadius = UDim.new(0, 8)
+devCorner.Parent = devBox
+
 local scanBtn = Instance.new("TextButton")
-scanBtn.Name = "ScanButton"
-scanBtn.Size = UDim2.new(0.92, 0, 0, 38)
-scanBtn.Position = UDim2.new(0.04, 0, 0.24, 0)
+scanBtn.Size = UDim2.new(0.92, 0, 0, 40)
+scanBtn.Position = UDim2.new(0.04, 0, 0.25, 0)
 scanBtn.BackgroundColor3 = THEME.btnBg
-scanBtn.Text = "Find a server for one person."
+scanBtn.Text = "🔎 Find a server for one person."
 scanBtn.TextColor3 = THEME.btnText
 scanBtn.TextSize = 12
-scanBtn.Font = Enum.Font.GothamBold
+scanBtn.Font = Enum.Font.GothamBlack
 scanBtn.Parent = bodyF
 
+local scanCorner = Instance.new("UICorner")
+scanCorner.CornerRadius = UDim.new(0, 10)
+scanCorner.Parent = scanBtn
+
 local scrollArea = Instance.new("ScrollingFrame")
-scrollArea.Name = "ServerList"
-scrollArea.Size = UDim2.new(0.92, 0, 0, 185)
-scrollArea.Position = UDim2.new(0.04, 0, 0.40, 0)
-scrollArea.BackgroundColor3 = Color3.fromRGB(6, 9, 15)
+scrollArea.Size = UDim2.new(0.92, 0, 0, 180)
+scrollArea.Position = UDim2.new(0.04, 0, 0.41, 0)
+scrollArea.BackgroundColor3 = Color3.fromRGB(7, 12, 22)
 scrollArea.BorderSizePixel = 0
 scrollArea.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollArea.ScrollBarThickness = 4
 scrollArea.Parent = bodyF
+
+local scrollCorner = Instance.new("UICorner")
+scrollCorner.CornerRadius = UDim.new(0, 10)
+scrollCorner.Parent = scrollArea
 
 local uiList = Instance.new("UIListLayout")
 uiList.SortOrder = Enum.SortOrder.LayoutOrder
 uiList.Padding = UDim.new(0, 6)
 uiList.Parent = scrollArea
 
--- ==================== KHUNG NHẬP KEY (MÀU XANH CHO NGƯỜI THƯỜNG) ====================
+-- Khung nhap key (mau xanh neon ruc ro)
 local keyWin = Instance.new("Frame")
-keyWin.Name = "KeyWindow"
-keyWin.Size = UDim2.new(0, 286, 0, 195)
-keyWin.Position = UDim2.new(0.5, -143, 0.5, -97)
-keyWin.BackgroundColor3 = Color3.fromRGB(10, 16, 28)
+keyWin.Size = UDim2.new(0, 292, 0, 205)
+keyWin.Position = UDim2.new(0.5, -146, 0.5, -102)
+keyWin.BackgroundColor3 = Color3.fromRGB(10, 18, 36)
 keyWin.BorderSizePixel = 0
 keyWin.Active = true
 keyWin.Draggable = true
 keyWin.Visible = not isOwner
-keyWin.Parent = templateGui
+keyWin.Parent = gui
 
 local kwCorner = Instance.new("UICorner")
-kwCorner.CornerRadius = UDim.new(0, 12)
+kwCorner.CornerRadius = UDim.new(0, 14)
 kwCorner.Parent = keyWin
 
 local kwStroke = Instance.new("UIStroke")
-kwStroke.Color = Color3.fromRGB(0, 150, 255)
-kwStroke.Thickness = 2
+kwStroke.Color = Color3.fromRGB(0, 200, 255)
+kwStroke.Thickness = 2.5
 kwStroke.Parent = keyWin
 
 local kTitle = Instance.new("TextLabel")
-kTitle.Name = "KeyTitle"
 kTitle.Size = UDim2.new(1, -20, 0, 28)
 kTitle.Position = UDim2.new(0, 10, 0, 8)
 kTitle.BackgroundTransparency = 1
-kTitle.Text = "AK HUB // KEY SYSTEM"
-kTitle.TextColor3 = Color3.fromRGB(0, 190, 255)
+kTitle.Text = "🔐 AK HUB // KEY SYSTEM ✨"
+kTitle.TextColor3 = Color3.fromRGB(56, 225, 255)
 kTitle.TextSize = 13
-kTitle.Font = Enum.Font.GothamBold
+kTitle.Font = Enum.Font.GothamBlack
 kTitle.Parent = keyWin
 
 local kUidHint = Instance.new("TextLabel")
-kUidHint.Name = "UidHint"
 kUidHint.Size = UDim2.new(1, -20, 0, 18)
-kUidHint.Position = UDim2.new(0, 10, 0, 34)
+kUidHint.Position = UDim2.new(0, 10, 0, 35)
 kUidHint.BackgroundTransparency = 1
-kUidHint.Text = "UserId: " .. tostring(LocalPlayer and LocalPlayer.UserId or "Unknown")
-kUidHint.TextColor3 = Color3.fromRGB(120, 205, 255)
+kUidHint.Text = "🆔 UserId: " .. tostring(lp.UserId)
+kUidHint.TextColor3 = Color3.fromRGB(255, 210, 75)
 kUidHint.TextSize = 11
-kUidHint.Font = Enum.Font.GothamSemibold
+kUidHint.Font = Enum.Font.GothamBold
 kUidHint.Parent = keyWin
 
 local keyBox = Instance.new("TextBox")
-keyBox.Name = "KeyInput"
 keyBox.Size = UDim2.new(0.88, 0, 0, 36)
 keyBox.Position = UDim2.new(0.06, 0, 0.31, 0)
-keyBox.BackgroundColor3 = Color3.fromRGB(18, 28, 46)
+keyBox.BackgroundColor3 = Color3.fromRGB(18, 32, 58)
 keyBox.BorderSizePixel = 0
 keyBox.Text = ""
-keyBox.PlaceholderText = "Paste key from website..."
-keyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
-keyBox.PlaceholderColor3 = Color3.fromRGB(130, 150, 180)
+keyBox.PlaceholderText = "🔑 Paste key from website..."
+keyBox.TextColor3 = Color3.fromRGB(120, 255, 180)
+keyBox.PlaceholderColor3 = Color3.fromRGB(145, 175, 215)
 keyBox.TextSize = 12
-keyBox.Font = Enum.Font.GothamSemibold
+keyBox.Font = Enum.Font.GothamBold
 keyBox.ClearTextOnFocus = false
 keyBox.Parent = keyWin
 
+local kbCorner = Instance.new("UICorner")
+kbCorner.CornerRadius = UDim.new(0, 8)
+kbCorner.Parent = keyBox
+
 local checkBtn = Instance.new("TextButton")
-checkBtn.Name = "ConfirmKeyBtn"
-checkBtn.Size = UDim2.new(0.42, 0, 0, 36)
-checkBtn.Position = UDim2.new(0.06, 0, 0.56, 0)
-checkBtn.BackgroundColor3 = Color3.fromRGB(0, 130, 240)
-checkBtn.Text = "Verify"
+checkBtn.Size = UDim2.new(0.42, 0, 0, 38)
+checkBtn.Position = UDim2.new(0.06, 0, 0.55, 0)
+checkBtn.BackgroundColor3 = Color3.fromRGB(24, 195, 110)
+checkBtn.Text = "✅ Verify"
 checkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 checkBtn.TextSize = 12
 checkBtn.Font = Enum.Font.GothamBold
 checkBtn.Parent = keyWin
 
+local chkCorner = Instance.new("UICorner")
+chkCorner.CornerRadius = UDim.new(0, 8)
+chkCorner.Parent = checkBtn
+
 local getKeyBtn = Instance.new("TextButton")
-getKeyBtn.Name = "GetKeyBtn"
-getKeyBtn.Size = UDim2.new(0.42, 0, 0, 36)
-getKeyBtn.Position = UDim2.new(0.52, 0, 0.56, 0)
-getKeyBtn.BackgroundColor3 = Color3.fromRGB(0, 95, 195)
-getKeyBtn.Text = "Get Key"
-getKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+getKeyBtn.Size = UDim2.new(0.42, 0, 0, 38)
+getKeyBtn.Position = UDim2.new(0.52, 0, 0.55, 0)
+getKeyBtn.BackgroundColor3 = Color3.fromRGB(255, 145, 0)
+getKeyBtn.Text = "🌐 Get Key"
+getKeyBtn.TextColor3 = Color3.fromRGB(25, 15, 0)
 getKeyBtn.TextSize = 12
 getKeyBtn.Font = Enum.Font.GothamBold
 getKeyBtn.Parent = keyWin
 
+local gkCorner = Instance.new("UICorner")
+gkCorner.CornerRadius = UDim.new(0, 8)
+gkCorner.Parent = getKeyBtn
+
 local kStatus = Instance.new("TextLabel")
-kStatus.Name = "KeyStatus"
-kStatus.Size = UDim2.new(0.92, 0, 0, 26)
+kStatus.Size = UDim2.new(0.92, 0, 0, 28)
 kStatus.Position = UDim2.new(0.04, 0, 0.79, 0)
 kStatus.BackgroundTransparency = 1
-kStatus.Text = "Click Get Key to copy link"
-kStatus.TextColor3 = Color3.fromRGB(160, 180, 210)
+kStatus.Text = "💡 Click Get Key to copy link"
+kStatus.TextColor3 = Color3.fromRGB(165, 215, 255)
 kStatus.TextSize = 10
-kStatus.Font = Enum.Font.Gotham
+kStatus.Font = Enum.Font.GothamSemibold
 kStatus.TextWrapped = true
 kStatus.Parent = keyWin
 
-local function bindGui(rootGui)
-    local mw = rootGui:FindFirstChild("MainHubWindow")
-    local kw = rootGui:FindFirstChild("KeyWindow")
-    if not mw then return end
+local minimized = false
+minBtn.MouseButton1Click:Connect(function()
+    minimized = not minimized
+    bodyF.Visible = not minimized
+    mainWin.Size = minimized and UDim2.new(0, 305, 0, 40) or UDim2.new(0, 305, 0, 355)
+    minBtn.Text = minimized and "+" or "-"
+end)
 
-    local bf = mw:FindFirstChild("BodyFrame")
-    local mb = mw:FindFirstChild("MinButton")
-    if mb and bf then
-        local minimized = false
-        mb.MouseButton1Click:Connect(function()
-            minimized = not minimized
-            bf.Visible = not minimized
-            mw.Size = minimized and UDim2.new(0, 300, 0, 38) or UDim2.new(0, 300, 0, 350)
-            mb.Text = minimized and "+" or "-"
+scanBtn.MouseButton1Click:Connect(function()
+    for _, c in ipairs(scrollArea:GetChildren()) do
+        if c:IsA("Frame") then c:Destroy() end
+    end
+    scanBtn.Text = "⏳ Scanning..."
+    local okReq, raw = pcall(function()
+        return game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
+    end)
+    if okReq and type(raw) == "string" then
+        local okDec, data = pcall(function()
+            return HttpService:JSONDecode(raw)
         end)
-    end
+        if okDec and type(data) == "table" and type(data.data) == "table" then
+            for _, srv in ipairs(data.data) do
+                local playing = srv.playing or 0
+                local maxP = srv.maxPlayers or 0
+                if playing >= 1 and playing <= 5 and srv.id ~= game.JobId then
+                    local card = Instance.new("Frame")
+                    card.Size = UDim2.new(1, -6, 0, 36)
+                    card.BackgroundColor3 = THEME.cardBg
+                    card.BorderSizePixel = 0
+                    card.Parent = scrollArea
 
-    if bf then
-        local sBtn = bf:FindFirstChild("ScanButton")
-        local scArea = bf:FindFirstChild("ServerList")
-        if sBtn and scArea then
-            sBtn.MouseButton1Click:Connect(function()
-                for _, c in ipairs(scArea:GetChildren()) do
-                    if c:IsA("Frame") then c:Destroy() end
-                end
-                sBtn.Text = "Scanning..."
-                local okReq, raw = pcall(function()
-                    return game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
-                end)
-                if okReq and type(raw) == "string" then
-                    local okDec, data = pcall(function()
-                        return HttpService:JSONDecode(raw)
+                    local cCorner = Instance.new("UICorner")
+                    cCorner.CornerRadius = UDim.new(0, 8)
+                    cCorner.Parent = card
+
+                    local lbl = Instance.new("TextLabel")
+                    lbl.Size = UDim2.new(0.68, -8, 1, 0)
+                    lbl.Position = UDim2.new(0, 8, 0, 0)
+                    lbl.BackgroundTransparency = 1
+                    lbl.Text = "👥 " .. playing .. "/" .. maxP .. " | " .. tostring(srv.id):sub(1, 8)
+                    lbl.TextColor3 = Color3.fromRGB(245, 250, 255)
+                    lbl.TextSize = 10
+                    lbl.Font = Enum.Font.GothamBold
+                    lbl.TextXAlignment = Enum.TextXAlignment.Left
+                    lbl.Parent = card
+
+                    local jBtn = Instance.new("TextButton")
+                    jBtn.Size = UDim2.new(0.28, 0, 0.72, 0)
+                    jBtn.Position = UDim2.new(0.70, 0, 0.14, 0)
+                    jBtn.BackgroundColor3 = THEME.btnBg
+                    jBtn.Text = "🚀 Join"
+                    jBtn.TextColor3 = THEME.btnText
+                    jBtn.TextSize = 10
+                    jBtn.Font = Enum.Font.GothamBlack
+                    jBtn.Parent = card
+
+                    local jbCorner = Instance.new("UICorner")
+                    jbCorner.CornerRadius = UDim.new(0, 6)
+                    jbCorner.Parent = jBtn
+
+                    jBtn.MouseButton1Click:Connect(function()
+                        pcall(function()
+                            TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, lp)
+                        end)
                     end)
-                    if okDec and type(data) == "table" and type(data.data) == "table" then
-                        for _, srv in ipairs(data.data) do
-                            local playing = srv.playing or 0
-                            local maxP = srv.maxPlayers or 0
-                            if playing >= 1 and playing <= 5 and srv.id ~= game.JobId then
-                                local card = Instance.new("Frame")
-                                card.Size = UDim2.new(1, -6, 0, 35)
-                                card.BackgroundColor3 = THEME.cardBg
-                                card.BorderSizePixel = 0
-                                card.Parent = scArea
-
-                                local lbl = Instance.new("TextLabel")
-                                lbl.Size = UDim2.new(0.68, -8, 1, 0)
-                                lbl.Position = UDim2.new(0, 8, 0, 0)
-                                lbl.BackgroundTransparency = 1
-                                lbl.Text = playing .. "/" .. maxP .. " | " .. tostring(srv.id):sub(1, 8)
-                                lbl.TextColor3 = Color3.fromRGB(235, 240, 250)
-                                lbl.TextSize = 10
-                                lbl.Font = Enum.Font.GothamSemibold
-                                lbl.TextXAlignment = Enum.TextXAlignment.Left
-                                lbl.Parent = card
-
-                                local jBtn = Instance.new("TextButton")
-                                jBtn.Size = UDim2.new(0.28, 0, 0.72, 0)
-                                jBtn.Position = UDim2.new(0.70, 0, 0.14, 0)
-                                jBtn.BackgroundColor3 = THEME.btnBg
-                                jBtn.Text = "Join"
-                                jBtn.TextColor3 = THEME.btnText
-                                jBtn.TextSize = 10
-                                jBtn.Font = Enum.Font.GothamBold
-                                jBtn.Parent = card
-
-                                jBtn.MouseButton1Click:Connect(function()
-                                    pcall(function()
-                                        TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, LocalPlayer)
-                                    end)
-                                end)
-                            end
-                        end
-                        local listLay = scArea:FindFirstChildOfClass("UIListLayout")
-                        if listLay then
-                            scArea.CanvasSize = UDim2.new(0, 0, 0, listLay.AbsoluteContentSize.Y + 10)
-                        end
-                    end
                 end
-                sBtn.Text = "Find a server for one person."
-            end)
+            end
+            scrollArea.CanvasSize = UDim2.new(0, 0, 0, uiList.AbsoluteContentSize.Y + 10)
         end
     end
+    scanBtn.Text = "🔎 Find a server for one person."
+end)
 
-    if kw then
-        local kInp = kw:FindFirstChild("KeyInput")
-        local cBtn = kw:FindFirstChild("ConfirmKeyBtn")
-        local gBtn = kw:FindFirstChild("GetKeyBtn")
-        local stLbl = kw:FindFirstChild("KeyStatus")
-
-        if gBtn and stLbl then
-            gBtn.MouseButton1Click:Connect(function()
-                if type(setclipboard) == "function" then
-                    pcall(setclipboard, KEY_LINK)
-                    stLbl.Text = "Link copied! Paste in browser."
-                else
-                    stLbl.Text = KEY_LINK
-                end
-            end)
-        end
-
-        if cBtn and kInp and stLbl then
-            cBtn.MouseButton1Click:Connect(function()
-                if isValidKey(kInp.Text) then
-                    kw.Visible = false
-                    mw.Visible = true
-                else
-                    stLbl.Text = "Invalid key or wrong UserId!"
-                end
-            end)
-        end
+getKeyBtn.MouseButton1Click:Connect(function()
+    if type(setclipboard) == "function" then
+        pcall(setclipboard, KEY_LINK)
+        kStatus.Text = "📋 Link copied! Paste in browser."
+        kStatus.TextColor3 = Color3.fromRGB(110, 255, 175)
+    else
+        kStatus.Text = KEY_LINK
+        kStatus.TextColor3 = Color3.fromRGB(255, 215, 90)
     end
-end
+end)
 
-for _,
+checkBtn.MouseButton1Click:Connect(function()
+    if isValidKey(keyBox.Text) then
+        keyWin.Visible = false
+        mainWin.Visible = true
+    else
+        kStatus.Text = "❌ Invalid key or wrong UserId!"
+        kStatus.TextColor3 = Color3.fromRGB(255, 110, 125)
+    end
+end)
