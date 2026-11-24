@@ -1,4 +1,4 @@
--- [[ Server Hub - No Key / Free - Credit: tan ]] --
+-- [[ Server Hub - Key System - Credit: tan ]] --
 local _SvcX = game
 local _Usrs = _SvcX:GetService("Players")
 local _TpRt = _SvcX:GetService("TeleportService")
@@ -6,6 +6,10 @@ local _NetF = _SvcX:GetService("HttpService")
 local _InpS = _SvcX:GetService("UserInputService")
 local _MePlr = _Usrs.LocalPlayer
 local _CoreG = _SvcX:GetService("CoreGui")
+
+-- CẤU HÌNH KEY CỦA ĐẠI CA Ở ĐÂY
+local _ValidKey = "123" 
+local _KeyLink = "https://www.facebook.com/share/1997xPycsP/"
 
 if _CoreG:FindFirstChild("ServerPickerHub") then
     _CoreG.ServerPickerHub:Destroy()
@@ -74,7 +78,7 @@ local function _ShowPop(_head, _desc, _dur)
     end)
 end
 
--- ==================== GIAO DIỆN CHÍNH ====================
+-- ==================== GIAO DIỆN CHÍNH (ẨN LÚC CHƯA NHẬP KEY) ====================
 local _MainWin = Instance.new("Frame")
 _MainWin.Size = UDim2.new(0, 300, 0, 360)
 _MainWin.Position = UDim2.new(0.02, 0, 0.18, 0)
@@ -82,6 +86,7 @@ _MainWin.BackgroundColor3 = Color3.fromRGB(10, 14, 22)
 _MainWin.BorderSizePixel = 0
 _MainWin.Active = true
 _MainWin.Draggable = true
+_MainWin.Visible = false -- Ẩn cho đến khi nhập đúng key
 _MainWin.Parent = _RootGui
 
 local _MWCor = Instance.new("UICorner")
@@ -195,7 +200,7 @@ _ExecBox.Size = UDim2.new(0.92, 0, 0, 26)
 _ExecBox.Position = UDim2.new(0.04, 0, 0.20, 0)
 _ExecBox.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
 _ExecBox.BorderSizePixel = 0
-_ExecBox.Text = "  ⚙️ Client: " .. _ExecName
+_ExecBox.Text = "  ⚙️ hack: " .. _ExecName
 _ExecBox.TextColor3 = Color3.fromRGB(255, 120, 120)
 _ExecBox.TextSize = 11
 _ExecBox.Font = Enum.Font.GothamSemibold
@@ -210,7 +215,7 @@ local _ScanBtn = Instance.new("TextButton")
 _ScanBtn.Size = UDim2.new(0.92, 0, 0, 38)
 _ScanBtn.Position = UDim2.new(0.04, 0, 0.31, 0)
 _ScanBtn.BackgroundColor3 = Color3.fromRGB(0, 130, 240)
-_ScanBtn.Text = "QUÉT DANH SÁCH SERVER"
+_ScanBtn.Text = "Find a server for one person."
 _ScanBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 _ScanBtn.TextSize = 12
 _ScanBtn.Font = Enum.Font.GothamBold
@@ -248,7 +253,7 @@ end
 
 local function _ExecuteScan()
     _WipeList()
-    _ShowPop("ĐANG QUÉT", "Đang tìm kiếm các server vắng...", 2)
+    _ShowPop("searching ", "time2...", 2)
     _ScanBtn.Text = "Đang quét..."
     
     local _CurrPlace = _SvcX.PlaceId
@@ -275,51 +280,5 @@ local function _ExecuteScan()
                 _Card.BorderSizePixel = 0
                 _Card.Parent = _ScrollArea
 
-                local _CCor = Instance.new("UICorner")
-                _CCor.CornerRadius = UDim.new(0, 6)
-                _CCor.Parent = _Card
-
-                local _CardLbl = Instance.new("TextLabel")
-                _CardLbl.Size = UDim2.new(0.6, 0, 1, 0)
-                _CardLbl.Position = UDim2.new(0.05, 0, 0, 0)
-                _CardLbl.BackgroundTransparency = 1
-                _CardLbl.Text = "👥 " .. _PCount .. " / " .. _MCount .. " người"
-                _CardLbl.TextColor3 = Color3.fromRGB(0, 255, 150)
-                _CardLbl.TextSize = 11
-                _CardLbl.Font = Enum.Font.GothamBold
-                _CardLbl.TextXAlignment = Enum.TextXAlignment.Left
-                _CardLbl.Parent = _Card
-
-                local _JumpBtn = Instance.new("TextButton")
-                _JumpBtn.Size = UDim2.new(0.32, 0, 0.76, 0)
-                _JumpBtn.Position = UDim2.new(0.65, 0, 0.12, 0)
-                _JumpBtn.BackgroundColor3 = Color3.fromRGB(0, 140, 255)
-                _JumpBtn.Text = "Vào Ngay"
-                _JumpBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
-                _JumpBtn.TextSize = 11
-                _JumpBtn.Font = Enum.Font.GothamBold
-                _JumpBtn.Parent = _Card
-
-                local _JBCor = Instance.new("UICorner")
-                _JBCor.CornerRadius = UDim.new(0, 5)
-                _JBCor.Parent = _JumpBtn
-
-                _JumpBtn.MouseButton1Click:Connect(function()
-                    _ShowPop("ĐANG BAY", "Đang kết nối vào server...", 2)
-                    _TpRt:TeleportToPlaceInstance(_CurrPlace, _srvInfo.id, _MePlr)
-                end)
-            end
-        end
-        
-        _ScrollArea.CanvasSize = UDim2.new(0, 0, 0, _FoundCount * 41)
-        _ShowPop("HOÀN TẤT", "Tìm thấy " .. _FoundCount .. " server vắng.", 3)
-    else
-        _ShowPop("LỖI", "Không thể lấy danh sách server!", 3)
-    end
-    
-    _ScanBtn.Text = "QUÉT DANH SÁCH SERVER"
-end
-
-_ScanBtn.MouseButton1Click:Connect(function()
-    task.spawn(_ExecuteScan)
-end)
+                local _CCor = Instance.new("U
+                    
