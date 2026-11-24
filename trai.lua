@@ -8,8 +8,18 @@ local _MePlr = _Usrs.LocalPlayer
 local _CoreG = _SvcX:GetService("CoreGui")
 
 -- CẤU HÌNH KEY CỦA ĐẠI CA Ở ĐÂY
-local _ValidKey = "123" 
 local _KeyLink = "https://dznhatlatan-boop.github.io/Wed-key-/"
+local _KeyDivisor = 7
+
+local function _IsValidKey(inputKey)
+    local cleanKey = tostring(inputKey or ""):gsub("%s+", "")
+    local num = tonumber(cleanKey)
+    if not num or num < 10000000 or num > 99999999 then
+        return false
+    end
+    return (num % _KeyDivisor) == 0
+end
+
 if _CoreG:FindFirstChild("ServerPickerHub") then
     _CoreG.ServerPickerHub:Destroy()
 end
@@ -85,7 +95,7 @@ _MainWin.BackgroundColor3 = Color3.fromRGB(10, 14, 22)
 _MainWin.BorderSizePixel = 0
 _MainWin.Active = true
 _MainWin.Draggable = true
-_MainWin.Visible = false -- Ẩn cho đến khi nhập đúng key
+_MainWin.Visible = false
 _MainWin.Parent = _RootGui
 
 local _MWCor = Instance.new("UICorner")
@@ -254,7 +264,7 @@ local function _ExecuteScan()
     _WipeList()
     _ShowPop("searching ", "time2...", 2)
     _ScanBtn.Text = "Đang quét..."
-    
+
     local _CurrPlace = _SvcX.PlaceId
     local _RawList = {}
     local _OkFlag = pcall(function()
@@ -267,17 +277,174 @@ local function _ExecuteScan()
     if _OkFlag and _RawList then
         local _FoundCount = 0
         for _, _srvInfo in ipairs(_RawList) do
-            local _PCount = _srvInfo.playing
-            local _MCount = _srvInfo.maxPlayers
-            
+            local _PCount = _srvInfo.playing or 0
+            local _MCount = _srvInfo.maxPlayers or 0
+
             if _PCount >= 1 and _PCount <= 5 and _srvInfo.id ~= _SvcX.JobId then
                 _FoundCount = _FoundCount + 1
-                
+
                 local _Card = Instance.new("Frame")
                 _Card.Size = UDim2.new(1, -6, 0, 35)
                 _Card.BackgroundColor3 = Color3.fromRGB(16, 22, 35)
                 _Card.BorderSizePixel = 0
                 _Card.Parent = _ScrollArea
 
-                local _CCor = Instance.new("U
-                    
+                local _CCor = Instance.new("UICorner")
+                _CCor.CornerRadius = UDim.new(0, 6)
+                _CCor.Parent = _Card
+
+                local _InfoLab = Instance.new("TextLabel")
+                _InfoLab.Size = UDim2.new(0.68, -8, 1, 0)
+                _InfoLab.Position = UDim2.new(0, 8, 0, 0)
+                _InfoLab.BackgroundTransparency = 1
+                _InfoLab.Text = "👥 " .. _PCount .. "/" .. _MCount .. " | " .. tostring(_srvInfo.id):sub(1, 8)
+                _InfoLab.TextColor3 = Color3.fromRGB(220, 235, 255)
+                _InfoLab.TextSize = 10
+                _InfoLab.Font = Enum.Font.GothamSemibold
+                _InfoLab.TextXAlignment = Enum.TextXAlignment.Left
+                _InfoLab.Parent = _Card
+
+                local _JoinBtn = Instance.new("TextButton")
+                _JoinBtn.Size = UDim2.new(0.28, 0, 0.72, 0)
+                _JoinBtn.Position = UDim2.new(0.70, 0, 0.14, 0)
+                _JoinBtn.BackgroundColor3 = Color3.fromRGB(0, 170, 110)
+                _JoinBtn.Text = "Join"
+                _JoinBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+                _JoinBtn.TextSize = 10
+                _JoinBtn.Font = Enum.Font.GothamBold
+                _JoinBtn.Parent = _Card
+
+                local _JCor = Instance.new("UICorner")
+                _JCor.CornerRadius = UDim.new(0, 5)
+                _JCor.Parent = _JoinBtn
+
+                _JoinBtn.MouseButton1Click:Connect(function()
+                    _ShowPop("Đang vào server", "Đang dịch chuyển...", 3)
+                    pcall(function()
+                        _TpRt:TeleportToPlaceInstance(_CurrPlace, _srvInfo.id, _MePlr)
+                    end)
+                end)
+            end
+        end
+
+        _ScrollArea.CanvasSize = UDim2.new(0, 0, 0, _UIList.AbsoluteContentSize.Y + 10)
+        if _FoundCount == 0 then
+            _ShowPop("Không có server", "Thử quét lại sau vài giây.", 3)
+        else
+            _ShowPop("Hoàn tất", "Tìm thấy " .. _FoundCount .. " server.", 3)
+        end
+    else
+        _ShowPop("Lỗi quét", "Không lấy được danh sách server.", 3)
+    end
+
+    _ScanBtn.Text = "Find a server for one person."
+end
+
+_ScanBtn.MouseButton1Click:Connect(_ExecuteScan)
+
+-- ==================== KHUNG NHẬP KEY ====================
+local _KeyWin = Instance.new("Frame")
+_KeyWin.Size = UDim2.new(0, 280, 0, 185)
+_KeyWin.Position = UDim2.new(0.5, -140, 0.5, -92)
+_KeyWin.BackgroundColor3 = Color3.fromRGB(12, 18, 30)
+_KeyWin.BorderSizePixel = 0
+_KeyWin.Active = true
+_KeyWin.Draggable = true
+_KeyWin.Parent = _RootGui
+
+local _KWCor = Instance.new("UICorner")
+_KWCor.CornerRadius = UDim.new(0, 12)
+_KWCor.Parent = _KeyWin
+
+local _KWStr = Instance.new("UIStroke")
+_KWStr.Color = Color3.fromRGB(0, 160, 255)
+_KWStr.Thickness = 2
+_KWStr.Parent = _KeyWin
+
+local _KTitle = Instance.new("TextLabel")
+_KTitle.Size = UDim2.new(1, -20, 0, 32)
+_KTitle.Position = UDim2.new(0, 10, 0, 6)
+_KTitle.BackgroundTransparency = 1
+_KTitle.Text = "🔐 NHẬP KEY ĐỂ MỞ HUB"
+_KTitle.TextColor3 = Color3.fromRGB(0, 190, 255)
+_KTitle.TextSize = 13
+_KTitle.Font = Enum.Font.GothamBold
+_KTitle.Parent = _KeyWin
+
+local _KeyBox = Instance.new("TextBox")
+_KeyBox.Size = UDim2.new(0.88, 0, 0, 36)
+_KeyBox.Position = UDim2.new(0.06, 0, 0.24, 0)
+_KeyBox.BackgroundColor3 = Color3.fromRGB(20, 30, 48)
+_KeyBox.BorderSizePixel = 0
+_KeyBox.Text = ""
+_KeyBox.PlaceholderText = "Dán dãy số key lấy từ web..."
+_KeyBox.TextColor3 = Color3.fromRGB(255, 255, 255)
+_KeyBox.PlaceholderColor3 = Color3.fromRGB(130, 150, 180)
+_KeyBox.TextSize = 12
+_KeyBox.Font = Enum.Font.GothamSemibold
+_KeyBox.ClearTextOnFocus = false
+_KeyBox.Parent = _KeyWin
+
+local _KBCor = Instance.new("UICorner")
+_KBCor.CornerRadius = UDim.new(0, 8)
+_KBCor.Parent = _KeyBox
+
+local _CheckBtn = Instance.new("TextButton")
+_CheckBtn.Size = UDim2.new(0.42, 0, 0, 36)
+_CheckBtn.Position = UDim2.new(0.06, 0, 0.52, 0)
+_CheckBtn.BackgroundColor3 = Color3.fromRGB(0, 160, 100)
+_CheckBtn.Text = "Xác nhận"
+_CheckBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+_CheckBtn.TextSize = 12
+_CheckBtn.Font = Enum.Font.GothamBold
+_CheckBtn.Parent = _KeyWin
+
+local _CBCor = Instance.new("UICorner")
+_CBCor.CornerRadius = UDim.new(0, 8)
+_CBCor.Parent = _CheckBtn
+
+local _GetKeyBtn = Instance.new("TextButton")
+_GetKeyBtn.Size = UDim2.new(0.42, 0, 0, 36)
+_GetKeyBtn.Position = UDim2.new(0.52, 0, 0.52, 0)
+_GetKeyBtn.BackgroundColor3 = Color3.fromRGB(0, 130, 240)
+_GetKeyBtn.Text = "Lấy Key"
+_GetKeyBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
+_GetKeyBtn.TextSize = 12
+_GetKeyBtn.Font = Enum.Font.GothamBold
+_GetKeyBtn.Parent = _KeyWin
+
+local _GBCor = Instance.new("UICorner")
+_GBCor.CornerRadius = UDim.new(0, 8)
+_GBCor.Parent = _GetKeyBtn
+
+local _KHint = Instance.new("TextLabel")
+_KHint.Size = UDim2.new(0.9, 0, 0, 24)
+_KHint.Position = UDim2.new(0.05, 0, 0.78, 0)
+_KHint.BackgroundTransparency = 1
+_KHint.Text = "Bấm Lấy Key để copy link web"
+_KHint.TextColor3 = Color3.fromRGB(160, 180, 210)
+_KHint.TextSize = 10
+_KHint.Font = Enum.Font.Gotham
+_KHint.Parent = _KeyWin
+
+_GetKeyBtn.MouseButton1Click:Connect(function()
+    if setclipboard then
+        pcall(setclipboard, _KeyLink)
+        _ShowPop("Đã copy link web", _KeyLink, 3)
+        _KHint.Text = "Đã copy link! Dán vào trình duyệt để lấy số."
+    else
+        _ShowPop("Link lấy key", _KeyLink, 5)
+        _KHint.Text = _KeyLink
+    end
+end)
+
+_CheckBtn.MouseButton1Click:Connect(function()
+    if _IsValidKey(_KeyBox.Text) then
+        _KeyWin:Destroy()
+        _MainWin.Visible = true
+        _ShowPop("Key hợp lệ", "Đã mở SERVER HUB!", 3)
+    else
+        _ShowPop("Key sai", "Số key chưa đúng, hãy lấy số mới trên web!", 3)
+        _KHint.Text = "Key không hợp lệ! Thử bấm Lấy Key Mới trên web."
+    end
+end)
