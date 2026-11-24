@@ -9,8 +9,7 @@ local _CoreG = _SvcX:GetService("CoreGui")
 
 -- CẤU HÌNH KEY CỦA ĐẠI CA Ở ĐÂY
 local _ValidKey = "123" 
-local _KeyLink = "https://www.facebook.com/share/1997xPycsP/"
-
+local _KeyLink = "https://dznhatlatan-boop.github.io/Wed-key-/"
 if _CoreG:FindFirstChild("ServerPickerHub") then
     _CoreG.ServerPickerHub:Destroy()
 end
