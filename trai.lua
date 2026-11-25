@@ -13,24 +13,16 @@ local OWNER_NAMES = {
     ["qwp1545"] = true,
 }
 
-local OWNER_USER_IDS = {
-    -- Thêm UserId thật của chủ hub nếu cần, VD: [123456789] = true,
-}
-
+local OWNER_USER_IDS = {}
 local lp = Players.LocalPlayer or Players.PlayerAdded:Wait()
 
 local function isOwnerAccount(player)
     if not player then return false end
     local uid = tonumber(player.UserId)
-    if uid and OWNER_USER_IDS[uid] == true then
-        return true
-    end
+    if uid and OWNER_USER_IDS[uid] == true then return true end
     local uname = string.lower(tostring(player.Name or ""))
     local dname = string.lower(tostring(player.DisplayName or ""))
-    if OWNER_NAMES[uname] or OWNER_NAMES[dname] then
-        return true
-    end
-    return false
+    return OWNER_NAMES[uname] or OWNER_NAMES[dname] or false
 end
 
 local function getCurrentCycle()
@@ -50,10 +42,9 @@ local function isValidKey(inputText)
     if not lp then return false end
     local cleaned = tostring(inputText or ""):gsub("%D", "")
     if cleaned == "" then return false end
-    local uid = lp.UserId
     local nowCycle = getCurrentCycle()
     for offset = -1, 30 do
-        if cleaned == buildUserKey(uid, nowCycle + offset) then
+        if cleaned == buildUserKey(lp.UserId, nowCycle + offset) then
             return true
         end
     end
@@ -73,10 +64,7 @@ local function clearAllOldGuis()
         for _, child in ipairs(container:GetChildren()) do
             if child:IsA("ScreenGui") then
                 local n = child.Name
-                if n == "AKHubColorGui"
-                    or n == "AKHubSingleGui"
-                    or n == "AKHubCleanGui"
-                    or n == "ServerHubTemplate"
+                if n == "AKHubColorGui" or n == "AKHubSingleGui" or n == "AKHubCleanGui" or n == "ServerHubTemplate"
                     or string.find(n, "TraiHubGui_", 1, true)
                     or string.find(n, "ServerPickerHub_", 1, true)
                     or string.find(n, "AKHub", 1, true)
@@ -91,27 +79,20 @@ end
 local function getGuiParent()
     local pg = lp:FindFirstChildOfClass("PlayerGui") or lp:WaitForChild("PlayerGui", 10)
     if pg then return pg end
-    local ok, cg = pcall(function()
-        return game:GetService("CoreGui")
-    end)
-    if ok and cg then return cg end
-    return nil
+    local ok, cg = pcall(function() return game:GetService("CoreGui") end)
+    return ok and cg or nil
 end
 
 _G.AKHubSessionId = (_G.AKHubSessionId or 0) + 1
 local mySession = _G.AKHubSessionId
-
 clearAllOldGuis()
 task.wait(0.05)
-if _G.AKHubSessionId ~= mySession then
-    return
-end
+if _G.AKHubSessionId ~= mySession then return end
 
 local parentGui = getGuiParent()
 if not parentGui then return end
 
 local isOwner = isOwnerAccount(lp)
-
 local THEME = isOwner and {
     windowBg = Color3.fromRGB(34, 22, 6),
     stroke = Color3.fromRGB(255, 205, 0),
@@ -174,10 +155,7 @@ mainWin.Active = true
 mainWin.Draggable = true
 mainWin.Visible = isOwner
 mainWin.Parent = gui
-
-local mwCorner = Instance.new("UICorner")
-mwCorner.CornerRadius = UDim.new(0, 14)
-mwCorner.Parent = mainWin
+Instance.new("UICorner", mainWin).CornerRadius = UDim.new(0, 14)
 
 local mwStroke = Instance.new("UIStroke")
 mwStroke.Color = THEME.stroke
@@ -204,10 +182,7 @@ gearBtn.TextColor3 = THEME.titleText
 gearBtn.TextSize = 14
 gearBtn.Font = Enum.Font.GothamBold
 gearBtn.Parent = mainWin
-
-local gearCorner = Instance.new("UICorner")
-gearCorner.CornerRadius = UDim.new(0, 8)
-gearCorner.Parent = gearBtn
+Instance.new("UICorner", gearBtn).CornerRadius = UDim.new(0, 8)
 
 local minBtn = Instance.new("TextButton")
 minBtn.Size = UDim2.new(0, 28, 0, 28)
@@ -218,10 +193,7 @@ minBtn.TextColor3 = THEME.titleText
 minBtn.TextSize = 16
 minBtn.Font = Enum.Font.GothamBold
 minBtn.Parent = mainWin
-
-local minCorner = Instance.new("UICorner")
-minCorner.CornerRadius = UDim.new(0, 8)
-minCorner.Parent = minBtn
+Instance.new("UICorner", minBtn).CornerRadius = UDim.new(0, 8)
 
 local bodyF = Instance.new("Frame")
 bodyF.Size = UDim2.new(1, 0, 1, -40)
@@ -241,10 +213,7 @@ usrBox.TextSize = 11
 usrBox.Font = Enum.Font.GothamBold
 usrBox.TextXAlignment = Enum.TextXAlignment.Left
 usrBox.Parent = bodyF
-
-local usrCorner = Instance.new("UICorner")
-usrCorner.CornerRadius = UDim.new(0, 8)
-usrCorner.Parent = usrBox
+Instance.new("UICorner", usrBox).CornerRadius = UDim.new(0, 8)
 
 local devType = (UserInputService.KeyboardEnabled and UserInputService.MouseEnabled) and "PC 💻" or "Mobile 📱"
 local devBox = Instance.new("TextLabel")
@@ -258,10 +227,7 @@ devBox.TextSize = 11
 devBox.Font = Enum.Font.GothamBold
 devBox.TextXAlignment = Enum.TextXAlignment.Left
 devBox.Parent = bodyF
-
-local devCorner = Instance.new("UICorner")
-devCorner.CornerRadius = UDim.new(0, 8)
-devCorner.Parent = devBox
+Instance.new("UICorner", devBox).CornerRadius = UDim.new(0, 8)
 
 local scanBtn = Instance.new("TextButton")
 scanBtn.Size = UDim2.new(0.92, 0, 0, 40)
@@ -272,10 +238,7 @@ scanBtn.TextColor3 = THEME.btnText
 scanBtn.TextSize = 12
 scanBtn.Font = Enum.Font.GothamBlack
 scanBtn.Parent = bodyF
-
-local scanCorner = Instance.new("UICorner")
-scanCorner.CornerRadius = UDim.new(0, 10)
-scanCorner.Parent = scanBtn
+Instance.new("UICorner", scanBtn).CornerRadius = UDim.new(0, 10)
 
 local scrollArea = Instance.new("ScrollingFrame")
 scrollArea.Size = UDim2.new(0.92, 0, 0, 180)
@@ -285,10 +248,7 @@ scrollArea.BorderSizePixel = 0
 scrollArea.CanvasSize = UDim2.new(0, 0, 0, 0)
 scrollArea.ScrollBarThickness = 4
 scrollArea.Parent = bodyF
-
-local scrollCorner = Instance.new("UICorner")
-scrollCorner.CornerRadius = UDim.new(0, 10)
-scrollCorner.Parent = scrollArea
+Instance.new("UICorner", scrollArea).CornerRadius = UDim.new(0, 10)
 
 local uiList = Instance.new("UIListLayout")
 uiList.SortOrder = Enum.SortOrder.LayoutOrder
@@ -304,10 +264,7 @@ keyWin.Active = true
 keyWin.Draggable = true
 keyWin.Visible = not isOwner
 keyWin.Parent = gui
-
-local kwCorner = Instance.new("UICorner")
-kwCorner.CornerRadius = UDim.new(0, 14)
-kwCorner.Parent = keyWin
+Instance.new("UICorner", keyWin).CornerRadius = UDim.new(0, 14)
 
 local kwStroke = Instance.new("UIStroke")
 kwStroke.Color = Color3.fromRGB(0, 200, 255)
@@ -347,10 +304,7 @@ keyBox.TextSize = 12
 keyBox.Font = Enum.Font.GothamBold
 keyBox.ClearTextOnFocus = false
 keyBox.Parent = keyWin
-
-local kbCorner = Instance.new("UICorner")
-kbCorner.CornerRadius = UDim.new(0, 8)
-kbCorner.Parent = keyBox
+Instance.new("UICorner", keyBox).CornerRadius = UDim.new(0, 8)
 
 local checkBtn = Instance.new("TextButton")
 checkBtn.Size = UDim2.new(0.42, 0, 0, 38)
@@ -361,10 +315,7 @@ checkBtn.TextColor3 = Color3.fromRGB(255, 255, 255)
 checkBtn.TextSize = 12
 checkBtn.Font = Enum.Font.GothamBold
 checkBtn.Parent = keyWin
-
-local chkCorner = Instance.new("UICorner")
-chkCorner.CornerRadius = UDim.new(0, 8)
-chkCorner.Parent = checkBtn
+Instance.new("UICorner", checkBtn).CornerRadius = UDim.new(0, 8)
 
 local getKeyBtn = Instance.new("TextButton")
 getKeyBtn.Size = UDim2.new(0.42, 0, 0, 38)
@@ -375,10 +326,7 @@ getKeyBtn.TextColor3 = Color3.fromRGB(25, 15, 0)
 getKeyBtn.TextSize = 12
 getKeyBtn.Font = Enum.Font.GothamBold
 getKeyBtn.Parent = keyWin
-
-local gkCorner = Instance.new("UICorner")
-gkCorner.CornerRadius = UDim.new(0, 8)
-gkCorner.Parent = getKeyBtn
+Instance.new("UICorner", getKeyBtn).CornerRadius = UDim.new(0, 8)
 
 local kStatus = Instance.new("TextLabel")
 kStatus.Size = UDim2.new(0.92, 0, 0, 28)
@@ -391,9 +339,7 @@ kStatus.Font = Enum.Font.GothamSemibold
 kStatus.TextWrapped = true
 kStatus.Parent = keyWin
 
-gearBtn.MouseButton1Click:Connect(function()
-    runFlyGuiV3()
-end)
+gearBtn.MouseButton1Click:Connect(runFlyGuiV3)
 
 local minimized = false
 minBtn.MouseButton1Click:Connect(function()
@@ -412,9 +358,7 @@ scanBtn.MouseButton1Click:Connect(function()
         return game:HttpGet("https://games.roblox.com/v1/games/" .. game.PlaceId .. "/servers/Public?sortOrder=Asc&limit=100")
     end)
     if okReq and type(raw) == "string" then
-        local okDec, data = pcall(function()
-            return HttpService:JSONDecode(raw)
-        end)
+        local okDec, data = pcall(function() return HttpService:JSONDecode(raw) end)
         if okDec and type(data) == "table" and type(data.data) == "table" then
             for _, srv in ipairs(data.data) do
                 local playing = srv.playing or 0
@@ -425,10 +369,7 @@ scanBtn.MouseButton1Click:Connect(function()
                     card.BackgroundColor3 = THEME.cardBg
                     card.BorderSizePixel = 0
                     card.Parent = scrollArea
-
-                    local cCorner = Instance.new("UICorner")
-                    cCorner.CornerRadius = UDim.new(0, 8)
-                    cCorner.Parent = card
+                    Instance.new("UICorner", card).CornerRadius = UDim.new(0, 8)
 
                     local lbl = Instance.new("TextLabel")
                     lbl.Size = UDim2.new(0.68, -8, 1, 0)
@@ -450,15 +391,26 @@ scanBtn.MouseButton1Click:Connect(function()
                     jBtn.TextSize = 10
                     jBtn.Font = Enum.Font.GothamBlack
                     jBtn.Parent = card
-
-                    local jbCorner = Instance.new("UICorner")
-                    jbCorner.CornerRadius = UDim.new(0, 6)
-                    jbCorner.Parent = jBtn
+                    Instance.new("UICorner", jBtn).CornerRadius = UDim.new(0, 6)
 
                     jBtn.MouseButton1Click:Connect(function()
-                        pcall(function()
+                        jBtn.Text = "⏳..."
+                        local okTele, errTele = pcall(function()
                             TeleportService:TeleportToPlaceInstance(game.PlaceId, srv.id, lp)
                         end)
+                        if not okTele then
+                            jBtn.Text = "❌ Err"
+                            warn("[AK HUB Teleport Error]:", tostring(errTele))
+                            task.delay(2, function()
+                                if jBtn and jBtn.Parent then jBtn.Text = "🚀 Join" end
+                            end)
+                        else
+                            task.delay(3, function()
+                                if jBtn and jBtn.Parent and jBtn.Text == "⏳..." then
+                                    jBtn.Text = "🚀 Join"
+                                end
+                            end)
+                        end
                     end)
                 end
             end
