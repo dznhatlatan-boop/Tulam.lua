@@ -9,7 +9,7 @@ local CYCLE_SECONDS = 18000
 
 local OWNER_NAMES = {
     ["hupbera23"] = true,
-    ["hupbera5"] = true,
+    ["qwp1545"] = true,
 }
 
 local OWNER_USER_IDS = {
